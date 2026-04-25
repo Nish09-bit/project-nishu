@@ -116,9 +116,51 @@ def logout():
 @app.route("/jobs")
 def jobs():
     conn = get_db()
-    jobs = conn.execute("SELECT * FROM jobs ORDER BY id DESC").fetchall()
+    keyword  = request.args.get("keyword", "")
+    location = request.args.get("location", "")
+    salary   = request.args.get("salary", "")
+    skill    = request.args.get("skill", "")
+
+    query  = "SELECT * FROM jobs WHERE 1=1"
+    params = []
+
+    if keyword.strip():
+        query += " AND job_title LIKE ?"
+        params.append(f"%{keyword}%")
+    if location.strip():
+        query += " AND location LIKE ?"
+        params.append(f"%{location}%")
+    if skill.strip():
+        query += " AND required_skills LIKE ?"
+        params.append(f"%{skill}%")
+    if salary.strip():
+        query += " AND salary LIKE ?"
+        params.append(f"%{salary}%")
+
+    query += " ORDER BY id DESC"
+    jobs = conn.execute(query, params).fetchall()
+
+    # Dropdown options - database se real values
+    all_locations = conn.execute("SELECT DISTINCT location FROM jobs WHERE location IS NOT NULL AND location != ''").fetchall()
+    all_skills_raw = conn.execute("SELECT required_skills FROM jobs WHERE required_skills IS NOT NULL AND required_skills != ''").fetchall()
+    all_salaries = conn.execute("SELECT DISTINCT salary FROM jobs WHERE salary IS NOT NULL AND salary != ''").fetchall()
+    all_titles = conn.execute("SELECT DISTINCT job_title FROM jobs WHERE job_title IS NOT NULL").fetchall()
+
+    # Skills ko split karke unique list banao
+    all_skills = set()
+    for row in all_skills_raw:
+        for s in row[0].split(','):
+            all_skills.add(s.strip())
+    all_skills = sorted(all_skills)
+
     conn.close()
-    return render_template("jobs.html", jobs=jobs)
+    return render_template("jobs.html", jobs=jobs,
+                           keyword=keyword, location=location,
+                           salary=salary, skill=skill,
+                           all_locations=all_locations,
+                           all_skills=all_skills,
+                           all_salaries=all_salaries,
+                           all_titles=all_titles)
 
 @app.route("/job/<int:job_id>")
 def job_detail(job_id):

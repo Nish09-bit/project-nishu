@@ -169,14 +169,15 @@
         <div style="max-width:500px; margin:0 auto; background:rgba(255,255,255,0.05); padding:30px; border-radius:16px; border:1px solid #334155;">
             <h3 style="color:white; margin-bottom:20px; text-align:center;">Leave a Review ⭐</h3>
             <form method="POST" action="/reviews">
-                <div style="display:flex; gap:10px; justify-content:center; margin-bottom:15px;">
-                    {% for i in range(1,6) %}
-                    <label style="cursor:pointer; font-size:28px;" title="{{ i }} star">
-                        <input type="radio" name="rating" value="{{ i }}" style="display:none;" required>
-                        ⭐
-                    </label>
-                    {% endfor %}
+                <div style="display:flex; gap:8px; justify-content:center; margin-bottom:15px;" id="starContainer">
+                    <input type="hidden" name="rating" id="ratingInput" value="" required>
+                    <span onclick="setRating(1)" class="star" data-val="1" style="cursor:pointer; font-size:32px; opacity:0.3; transition:all 0.15s;">★</span>
+                    <span onclick="setRating(2)" class="star" data-val="2" style="cursor:pointer; font-size:32px; opacity:0.3; transition:all 0.15s;">★</span>
+                    <span onclick="setRating(3)" class="star" data-val="3" style="cursor:pointer; font-size:32px; opacity:0.3; transition:all 0.15s;">★</span>
+                    <span onclick="setRating(4)" class="star" data-val="4" style="cursor:pointer; font-size:32px; opacity:0.3; transition:all 0.15s;">★</span>
+                    <span onclick="setRating(5)" class="star" data-val="5" style="cursor:pointer; font-size:32px; opacity:0.3; transition:all 0.15s;">★</span>
                 </div>
+                <p id="ratingMsg" style="text-align:center; color:#94a3b8; font-size:12px; margin-bottom:10px;">Click a star to rate</p>
                 <textarea name="message" placeholder="Share your experience with FreshHire..." rows="3"
                     style="width:100%; padding:12px; border:2px solid #334155; border-radius:10px; background:#0f172a; color:white; font-family:'Poppins',sans-serif; font-size:14px; outline:none; resize:none; box-sizing:border-box;"></textarea>
                 <button type="submit" class="btn" style="width:100%; margin-top:12px;">Submit Review 🚀</button>
@@ -201,5 +202,27 @@ function toggleMenu() {
 }
 </script>
 
+
+<script>
+function setRating(val) {
+    document.getElementById('ratingInput').value = val;
+    var stars = document.querySelectorAll('.star');
+    stars.forEach(function(s) {
+        var sv = parseInt(s.getAttribute('data-val'));
+        if (sv <= val) {
+            s.style.opacity = '1';
+            s.style.color = '#f59e0b';
+            s.style.transform = 'scale(1.2)';
+        } else {
+            s.style.opacity = '0.3';
+            s.style.color = 'white';
+            s.style.transform = 'scale(1)';
+        }
+    });
+    var msgs = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent!'];
+    document.getElementById('ratingMsg').textContent = msgs[val] + ' (' + val + '/5)';
+    document.getElementById('ratingMsg').style.color = '#f59e0b';
+}
+</script>
 </body>
 </html>
