@@ -56,35 +56,54 @@ def home():
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
-        first_name = request.form.get("first_name", "").strip()
-        last_name  = request.form.get("last_name", "").strip()
-        email      = request.form.get("email", "").strip()
-        username   = request.form.get("username", "").strip()
-        password   = request.form.get("password", "")
-        confirm    = request.form.get("confirm_password", "")
-        role       = request.form.get("role", "fresher")
-        if not first_name or not email or not username or not password:
+        first_name   = request.form.get("first_name", "").strip()
+        last_name    = request.form.get("last_name", "").strip()
+        email        = request.form.get("email", "").strip()
+        phone        = request.form.get("phone", "").strip()
+        username     = request.form.get("username", "").strip()
+        password     = request.form.get("password", "")
+        confirm      = request.form.get("confirm_password", "")
+        role         = request.form.get("role", "fresher")
+        login_method = request.form.get("login_method", "email")
+
+        if not first_name or not username or not password:
             flash("Please fill all required fields!", "error")
+            return render_template("signup.html")
+        if login_method == "phone" and not phone:
+            flash("Please enter your mobile number!", "error")
+            return render_template("signup.html")
+        if login_method == "email" and not email:
+            flash("Please enter your email address!", "error")
             return render_template("signup.html")
         if password != confirm:
             flash("Passwords do not match!", "error")
             return render_template("signup.html")
+
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         conn = get_db()
+        # Add phone column if it doesn't exist yet
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN phone TEXT")
+            conn.commit()
+        except:
+            pass
         try:
             conn.execute(
-                "INSERT INTO users (first_name, last_name, email, username, password, role) VALUES (?,?,?,?,?,?)",
-                (first_name, last_name, email, username, hashed, role)
+                "INSERT INTO users (first_name, last_name, email, phone, username, password, role) VALUES (?,?,?,?,?,?,?)",
+                (first_name, last_name, email or None, phone or None, username, hashed, role)
             )
             conn.commit()
-            user_id = conn.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()[0]
+            if email:
+                user_id = conn.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()[0]
+            else:
+                user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
             session["user_id"] = user_id
             session["name"]    = first_name
             session["role"]    = role
             flash(f"Welcome to FreshHire, {first_name}! 🎉", "success")
             return redirect(url_for("home"))
         except:
-            flash("Email or username already exists!", "error")
+            flash("Email, phone or username already exists!", "error")
         finally:
             conn.close()
     return render_template("signup.html")
@@ -92,10 +111,20 @@ def signup():
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
-        email    = request.form.get("email", "").strip()
-        password = request.form.get("password", "")
+        login_method = request.form.get("login_method", "email")
+        identifier   = request.form.get("identifier", "").strip()
+        password     = request.form.get("password", "")
         conn = get_db()
-        user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+        # Add phone column if it doesn't exist yet
+        try:
+            conn.execute("ALTER TABLE users ADD COLUMN phone TEXT")
+            conn.commit()
+        except:
+            pass
+        if login_method == "phone":
+            user = conn.execute("SELECT * FROM users WHERE phone=?", (identifier,)).fetchone()
+        else:
+            user = conn.execute("SELECT * FROM users WHERE email=?", (identifier,)).fetchone()
         conn.close()
         if user and bcrypt.checkpw(password.encode("utf-8"), user["password"].encode("utf-8")):
             session["user_id"] = user["id"]
@@ -104,7 +133,7 @@ def login():
             flash(f"Welcome, {user['first_name']}! 👋", "success")
             return redirect(url_for("home"))
         else:
-            flash("Wrong email or password!", "error")
+            flash("Wrong credentials or account not found!", "error")
     return render_template("login.html")
 
 @app.route("/logout")
@@ -115,77 +144,27 @@ def logout():
 
 @app.route("/jobs")
 def jobs():
-    query = request.args.get("q", "").strip()
+    q        = request.args.get("q", "").strip()
     location = request.args.get("location", "").strip()
-    skill = request.args.get("skill", "").strip()
-    conn = get_db()
-<<<<<<< HEAD
-    if query or location or skill:
-        sql = "SELECT * FROM jobs WHERE 1=1"
-        params = []
-        if query:
-            sql += " AND (job_title LIKE ? OR company LIKE ? OR description LIKE ?)"
-            like = f"%{query}%"
-            params.extend([like, like, like])
-        if skill:
-            sql += " AND required_skills LIKE ?"
-            params.append(f"%{skill}%")
-        if location:
-            sql += " AND location LIKE ?"
-            params.append(f"%{location}%")
-        sql += " ORDER BY id DESC"
-        jobs = conn.execute(sql, params).fetchall()
-    else:
-        jobs = conn.execute("SELECT * FROM jobs ORDER BY id DESC").fetchall()
-    conn.close()
-    return render_template("jobs.html", jobs=jobs, query=query, location=location, skill=skill)
-=======
-    keyword  = request.args.get("keyword", "")
-    location = request.args.get("location", "")
-    salary   = request.args.get("salary", "")
-    skill    = request.args.get("skill", "")
+    skill    = request.args.get("skill", "").strip()
+    conn     = get_db()
 
-    query  = "SELECT * FROM jobs WHERE 1=1"
+    sql    = "SELECT * FROM jobs WHERE 1=1"
     params = []
-
-    if keyword.strip():
-        query += " AND job_title LIKE ?"
-        params.append(f"%{keyword}%")
-    if location.strip():
-        query += " AND location LIKE ?"
-        params.append(f"%{location}%")
-    if skill.strip():
-        query += " AND required_skills LIKE ?"
+    if q:
+        sql += " AND (job_title LIKE ? OR company LIKE ? OR description LIKE ?)"
+        like = f"%{q}%"
+        params.extend([like, like, like])
+    if skill:
+        sql += " AND required_skills LIKE ?"
         params.append(f"%{skill}%")
-    if salary.strip():
-        query += " AND salary LIKE ?"
-        params.append(f"%{salary}%")
-
-    query += " ORDER BY id DESC"
-    jobs = conn.execute(query, params).fetchall()
-
-    # Dropdown options - database se real values
-    all_locations = conn.execute("SELECT DISTINCT location FROM jobs WHERE location IS NOT NULL AND location != ''").fetchall()
-    all_skills_raw = conn.execute("SELECT required_skills FROM jobs WHERE required_skills IS NOT NULL AND required_skills != ''").fetchall()
-    all_salaries = conn.execute("SELECT DISTINCT salary FROM jobs WHERE salary IS NOT NULL AND salary != ''").fetchall()
-    all_titles = conn.execute("SELECT DISTINCT job_title FROM jobs WHERE job_title IS NOT NULL").fetchall()
-
-    # Skills ko split karke unique list banao
-    all_skills = set()
-    for row in all_skills_raw:
-        for s in row[0].split(','):
-            all_skills.add(s.strip())
-    all_skills = sorted(all_skills)
-
+    if location:
+        sql += " AND location LIKE ?"
+        params.append(f"%{location}%")
+    sql += " ORDER BY id DESC"
+    jobs = conn.execute(sql, params).fetchall()
     conn.close()
-    return render_template("jobs.html", jobs=jobs,
-                           keyword=keyword, location=location,
-                           salary=salary, skill=skill,
-                           all_locations=all_locations,
-                           all_skills=all_skills,
-                           all_salaries=all_salaries,
-                           all_titles=all_titles)
->>>>>>> f92d3e1a9860da391238581373bf9e15236fec95
+    return render_template("jobs.html", jobs=jobs, query=q, location=location, skill=skill)
 
 @app.route("/job/<int:job_id>")
 def job_detail(job_id):
@@ -487,8 +466,8 @@ def chat(receiver_id):
                 "INSERT INTO notifications (user_id, message, created_at, sender_id) VALUES (?,?,?,?)",
                 (receiver_id,
                  f"💬 {session['name']} sent you a message!",
-datetime.now().strftime("%Y-%m-%d %H:%M"),
-session["user_id"])
+                 datetime.now().strftime("%Y-%m-%d %H:%M"),
+                 session["user_id"])
             )
             conn.commit()
     messages = conn.execute("""
@@ -639,6 +618,7 @@ def contact():
         flash("Message sent successfully! ✅", "success")
         return redirect(url_for("contact"))
     return render_template("contact.html")
+
 # ================= COMPANY PROFILE ================= #
 @app.route("/company/create", methods=["GET", "POST"])
 def create_company():
@@ -652,7 +632,7 @@ def create_company():
     existing = conn.execute("SELECT * FROM companies WHERE user_id=?", (session["user_id"],)).fetchone()
     if request.method == "POST":
         if existing:
-            conn.execute("""UPDATE companies SET company_name=?, industry=?, location=?, 
+            conn.execute("""UPDATE companies SET company_name=?, industry=?, location=?,
                 website=?, description=?, founded=?, size=? WHERE user_id=?""",
                 (request.form.get("company_name"), request.form.get("industry"),
                  request.form.get("location"), request.form.get("website"),
