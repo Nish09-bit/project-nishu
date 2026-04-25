@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resume Builder - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="/static/favicon.png" type="image/png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<nav>
+    <a href="/" style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+        <img src="/static/logo.png" alt="logo" style="height:32px;">
+        <span style="color:white; font-weight:800; font-size:20px;">FreshHire</span>
+    </a>
+    <div class="nav-links" id="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        <a href="/about">About</a>
+        {% if session.get('user_id') %}
+            <a href="/my-profile">My Profile</a>
+            <a href="/resume-builder">Resume Builder</a>
+            <a href="/dashboard">Dashboard</a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+    <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+        <span></span><span></span><span></span>
+    </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container" style="margin-top:20px; margin-bottom:0;">
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="page-banner">
+    <h1>📄 Resume Builder</h1>
+    <p>Create a professional resume in minutes</p>
+</div>
+
+<div style="max-width:800px; margin:40px auto; padding:0 20px 60px;">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px;">
+
+        <!-- Form Side -->
+        <div class="form-container" style="margin:0;">
+            <h2 style="font-size:20px; margin-bottom:20px;">Fill Your Details ✍️</h2>
+            <form method="POST" action="/resume-builder" id="resumeForm">
+
+                <p style="font-weight:700; color:#10b981; margin-bottom:8px; font-size:13px;">🎯 Career Objective</p>
+                <textarea name="objective" placeholder="Write your career objective..." rows="3" oninput="updatePreview()">{{ resume.objective if resume else '' }}</textarea>
+
+                <p style="font-weight:700; color:#10b981; margin-bottom:8px; font-size:13px;">💼 Experience</p>
+                <textarea name="experience" placeholder="e.g. Intern at XYZ Company (2024)&#10;- Worked on Python projects&#10;- Built REST APIs" rows="4" oninput="updatePreview()">{{ resume.experience if resume else '' }}</textarea>
+
+                <p style="font-weight:700; color:#10b981; margin-bottom:8px; font-size:13px;">🎓 Education</p>
+                <textarea name="education" placeholder="e.g. B.Tech Computer Science&#10;ABC College, 2024&#10;CGPA: 8.5" rows="3" oninput="updatePreview()">{{ resume.education if resume else '' }}</textarea>
+
+                <p style="font-weight:700; color:#10b981; margin-bottom:8px; font-size:13px;">💻 Skills</p>
+                <textarea name="skills" placeholder="e.g. Python, Java, React, SQL, Git" rows="2" oninput="updatePreview()">{{ resume.skills if resume else '' }}</textarea>
+
+                <p style="font-weight:700; color:#10b981; margin-bottom:8px; font-size:13px;">🏆 Certifications</p>
+                <textarea name="certifications" placeholder="e.g. AWS Cloud Practitioner&#10;Google Python Certificate" rows="2" oninput="updatePreview()">{{ resume.certifications if resume else '' }}</textarea>
+
+                <p style="font-weight:700; color:#10b981; margin-bottom:8px; font-size:13px;">🌐 Languages</p>
+                <input type="text" name="languages" placeholder="e.g. Hindi, English" value="{{ resume.languages if resume else '' }}" oninput="updatePreview()">
+
+                <button type="submit">Save Resume ✅</button>
+
+                {% if resume %}
+                <a href="/view-resume" class="btn" style="display:block; text-align:center; margin-top:10px; background:#1e293b; border:1px solid #334155;">Preview & Print 🖨️</a>
+                {% endif %}
+            </form>
+        </div>
+
+        <!-- Live Preview Side -->
+        <div id="preview" style="background:white; border-radius:16px; padding:28px; border:1px solid #e2e8f0; box-shadow:0 4px 20px rgba(0,0,0,0.08); position:sticky; top:80px; height:fit-content;">
+            <div style="border-bottom:3px solid #10b981; padding-bottom:15px; margin-bottom:15px;">
+                <h2 id="prev-name" style="color:#1a1a2e; font-size:22px; margin-bottom:4px;">{{ profile.name if profile else 'Your Name' }}</h2>
+                <p id="prev-skill" style="color:#10b981; font-size:13px; font-weight:600;">{{ profile.primary_skill if profile else 'Your Skills' }}</p>
+                <p style="color:#64748b; font-size:12px;">{{ profile.email if profile else '' }} {% if profile and profile.phone %}• {{ profile.phone }}{% endif %}</p>
+            </div>
+            <div id="prev-objective" style="margin-bottom:12px; font-size:12px; color:#64748b; line-height:1.6;"></div>
+            <div id="prev-education" style="margin-bottom:12px;"></div>
+            <div id="prev-skills" style="margin-bottom:12px;"></div>
+            <div id="prev-experience" style="margin-bottom:12px;"></div>
+            <div id="prev-certifications" style="margin-bottom:12px;"></div>
+            <p style="text-align:center; color:#94a3b8; font-size:11px; margin-top:10px;">Live Preview</p>
+        </div>
+    </div>
+</div>
+
+<footer>© 2026 <span>FreshHire</span> — Built for Freshers 💚</footer>
+
+<script>
+function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+
+function updatePreview() {
+    var form = document.getElementById('resumeForm');
+    var obj  = form.objective.value;
+    var edu  = form.education.value;
+    var skl  = form.skills.value;
+    var exp  = form.experience.value;
+    var cert = form.certifications.value;
+
+    document.getElementById('prev-objective').innerHTML = obj ?
+        '<p style="font-weight:700; color:#1a1a2e; font-size:12px; margin-bottom:4px;">OBJECTIVE</p><p style="color:#64748b; font-size:11px; line-height:1.6;">' + obj + '</p>' : '';
+
+    document.getElementById('prev-education').innerHTML = edu ?
+        '<p style="font-weight:700; color:#1a1a2e; font-size:12px; margin-bottom:4px;">EDUCATION</p><p style="color:#64748b; font-size:11px; line-height:1.6; white-space:pre-line;">' + edu + '</p>' : '';
+
+    document.getElementById('prev-skills').innerHTML = skl ?
+        '<p style="font-weight:700; color:#1a1a2e; font-size:12px; margin-bottom:6px;">SKILLS</p><div style="display:flex; flex-wrap:wrap; gap:4px;">' +
+        skl.split(',').map(s => '<span style="background:#ecfdf5; color:#059669; padding:2px 8px; border-radius:20px; font-size:10px; font-weight:600;">' + s.trim() + '</span>').join('') +
+        '</div>' : '';
+
+    document.getElementById('prev-experience').innerHTML = exp ?
+        '<p style="font-weight:700; color:#1a1a2e; font-size:12px; margin-bottom:4px; margin-top:8px;">EXPERIENCE</p><p style="color:#64748b; font-size:11px; line-height:1.6; white-space:pre-line;">' + exp + '</p>' : '';
+
+    document.getElementById('prev-certifications').innerHTML = cert ?
+        '<p style="font-weight:700; color:#1a1a2e; font-size:12px; margin-bottom:4px; margin-top:8px;">CERTIFICATIONS</p><p style="color:#64748b; font-size:11px; line-height:1.6; white-space:pre-line;">' + cert + '</p>' : '';
+}
+
+// Init preview on load
+updatePreview();
+</script>
+</body>
+</html>

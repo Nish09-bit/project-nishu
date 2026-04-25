@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Profile - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🚀 FreshHire</h2>
+    <div class="nav-links" id="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        {% if session.get('role') == 'hirer' %}
+        <a href="/post-job">Post Job</a>
+        {% endif %}
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        {% if session.get('user_id') %}
+            <a href="/bookmarks">🔖 Bookmarks</a>
+            <a href="/dashboard">Dashboard</a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% endif %}
+    </div>
+    <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+        <span></span><span></span><span></span>
+    </div>
+</nav>
+
+<div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding:60px 20px; text-align:center; color:white;">
+    <h1 style="font-size:32px; font-weight:800;">My Profile 👤</h1>
+</div>
+
+<div style="max-width:750px; margin:40px auto; padding:0 20px;">
+
+    <div class="card" style="padding:35px;">
+
+        <!-- Profile Header -->
+        <div style="display:flex; align-items:center; gap:25px; margin-bottom:30px; flex-wrap:wrap;">
+            <div style="width:100px; height:100px; border-radius:50%; overflow:hidden; border:3px solid #10b981; flex-shrink:0;">
+                {% if profile.photo %}
+                <img src="/static/photos/{{ profile.photo }}" style="width:100%; height:100%; object-fit:cover;">
+                {% else %}
+                <div style="width:100%; height:100%; background:#ecfdf5; display:flex; align-items:center; justify-content:center; font-size:45px;">👤</div>
+                {% endif %}
+            </div>
+            <div>
+                <h2 style="color:#1a1a2e; font-size:26px; margin:0 0 5px;">{{ profile.name }}</h2>
+                <p style="color:#10b981; font-weight:600; margin:0 0 5px;">{{ profile.primary_skill }}</p>
+                <p style="color:#94a3b8; font-size:14px; margin:0;">📍 {{ profile.city }} • 🎓 {{ profile.college }}</p>
+            </div>
+        </div>
+
+        <!-- Bio -->
+        {% if profile.bio %}
+        <div style="margin-bottom:25px; padding:20px; background:#f8fafb; border-radius:12px;">
+            <h3 style="color:#1a1a2e; margin-bottom:10px;">About Me</h3>
+            <p style="color:#64748b; line-height:1.8;">{{ profile.bio }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Details -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:25px;">
+            <div style="padding:15px; background:#f8fafb; border-radius:12px;">
+                <p style="color:#94a3b8; font-size:12px; margin:0 0 5px;">EMAIL</p>
+                <p style="color:#1a1a2e; font-weight:600; margin:0;">{{ profile.email }}</p>
+            </div>
+            <div style="padding:15px; background:#f8fafb; border-radius:12px;">
+                <p style="color:#94a3b8; font-size:12px; margin:0 0 5px;">PHONE</p>
+                <p style="color:#1a1a2e; font-weight:600; margin:0;">{{ profile.phone or 'Not added' }}</p>
+            </div>
+            <div style="padding:15px; background:#f8fafb; border-radius:12px;">
+                <p style="color:#94a3b8; font-size:12px; margin:0 0 5px;">DEGREE</p>
+                <p style="color:#1a1a2e; font-weight:600; margin:0;">{{ profile.degree or 'Not added' }}</p>
+            </div>
+            <div style="padding:15px; background:#f8fafb; border-radius:12px;">
+                <p style="color:#94a3b8; font-size:12px; margin:0 0 5px;">COLLEGE</p>
+                <p style="color:#1a1a2e; font-weight:600; margin:0;">{{ profile.college or 'Not added' }}</p>
+            </div>
+        </div>
+
+        <!-- Project -->
+        {% if profile.project_title %}
+        <div style="margin-bottom:25px; padding:20px; background:#ecfdf5; border-radius:12px; border:1px solid #a7f3d0;">
+            <h3 style="color:#059669; margin-bottom:10px;">🚀 {{ profile.project_title }}</h3>
+            <p style="color:#64748b; line-height:1.8; margin-bottom:10px;">{{ profile.project_desc }}</p>
+            {% if profile.project_link %}
+            <a href="{{ profile.project_link }}" target="_blank" class="btn" style="font-size:13px; padding:8px 16px;">View Project →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Resume -->
+        {% if profile.resume %}
+        <div style="margin-bottom:25px;">
+            <a href="/static/resumes/{{ profile.resume }}" target="_blank" class="btn" style="background:#1e293b;">📄 View Resume</a>
+        </div>
+        {% endif %}
+
+        <!-- Action Buttons -->
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="/edit-profile" class="btn">Edit Profile ✏️</a>
+            <a href="/dashboard" class="btn" style="background:#1e293b; border:1px solid #334155;">← Dashboard</a>
+        </div>
+
+    </div>
+</div>
+
+<footer>© 2026 <span>FreshHire</span> — Built for Freshers 💚</footer>
+
+<script>
+function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+</script>
+
+</body>
+</html>

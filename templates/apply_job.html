@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Apply for Job - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body style="background:#f4f9f4;">
+
+<nav>
+    <h2>🚀 FreshHire</h2>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        {% if session.get('user_id') %}
+            <a href="/dashboard">Dashboard</a>
+            <a href="/notifications">🔔 
+                {% if notif_count > 0 %}
+                <span style="background:#dc2626; color:white; border-radius:50%; padding:2px 6px; font-size:11px;">{{ notif_count }}</span>
+                {% endif %}
+            </a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container">
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="form-container" style="max-width:600px; margin-top:40px; margin-bottom:40px;">
+    <div style="text-align:center; margin-bottom:25px;">
+        <span style="font-size:40px;">📝</span>
+        <h2 style="margin-top:10px;">Apply for Job</h2>
+        <p style="color:#888; font-size:14px;">{{ job.job_title }} at {{ job.company }}</p>
+    </div>
+
+    {% if already %}
+    <div class="flash-error">You already applied for this job!</div>
+    <p style="text-align:center;"><a href="/jobs" class="btn">Browse More Jobs</a></p>
+    {% else %}
+    <div class="card" style="margin-bottom:20px;">
+        <h3 style="color:#16a34a;">{{ job.job_title }}</h3>
+        <p style="color:#888;">{{ job.company }} • {{ job.location }}</p>
+        <p style="color:#555; font-size:13px;">💰 {{ job.salary }}</p>
+    </div>
+
+    <form method="POST" action="/apply/{{ job.id }}">
+        <p style="font-weight:700; color:#16a34a; margin-bottom:10px;">✉️ Cover Letter</p>
+        <textarea name="cover_letter" placeholder="Write why you are a good fit for this job..." rows="6" required></textarea>
+        <button type="submit">Submit Application 🚀</button>
+    </form>
+    {% endif %}
+
+    <p style="text-align:center; margin-top:15px;">
+        <a href="/jobs" style="color:#aaa; font-size:13px;">← Back to Jobs</a>
+    </p>
+</div>
+
+<footer>
+    © 2026 FreshHire — Built for Freshers 💚
+</footer>
+
+</body>
+</html>

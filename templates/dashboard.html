@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dashboard - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🚀 FreshHire</h2>
+    <div class="nav-links" id="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        {% if session.get('role') == 'hirer' %}
+        <a href="/post-job">Post Job</a>
+        {% endif %}
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        {% if session.get('user_id') %}
+            <a href="/my-profile">My Profile</a>
+            <a href="/bookmarks">🔖 Bookmarks</a>
+            <a href="/notifications">🔔
+                {% if notif_count > 0 %}
+                <span style="background:#dc2626; color:white; border-radius:50%; padding:2px 6px; font-size:11px;">{{ notif_count }}</span>
+                {% endif %}
+            </a>
+            <a href="/dashboard">Dashboard</a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+    <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+        <span></span><span></span><span></span>
+    </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container">
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding:50px 20px; color:white; text-align:center;">
+    <h1 style="font-size:32px; font-weight:800;">Welcome, {{ session.get('name') }}! 👋</h1>
+    <p style="color:#94a3b8;">Here's your FreshHire dashboard</p>
+</div>
+
+<div class="container">
+
+    <!-- Stats -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:20px; margin-top:30px;">
+        <div class="card" style="text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">💼</div>
+            <h2 style="color:#10b981; font-size:36px;">{{ total_jobs }}</h2>
+            <p style="color:#94a3b8;">Total Jobs</p>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">👨‍💻</div>
+            <h2 style="color:#10b981; font-size:36px;">{{ total_profiles }}</h2>
+            <p style="color:#94a3b8;">Total Freshers</p>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">👥</div>
+            <h2 style="color:#10b981; font-size:36px;">{{ total_users }}</h2>
+            <p style="color:#94a3b8;">Total Users</p>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">✅</div>
+            <h2 style="color:#10b981; font-size:36px;">{{ my_jobs|length }}</h2>
+            <p style="color:#94a3b8;">My Posted Jobs</p>
+        </div>
+    </div>
+
+    <!-- My Profile Section -->
+    <div class="card" style="margin-top:30px;">
+        <h2 class="section-title">My Profile 👤</h2>
+        {% if my_profile %}
+        <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap;">
+            <div style="width:80px; height:80px; background:#ecfdf5; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:35px; overflow:hidden; flex-shrink:0;">
+                {% if my_profile.photo %}
+                <img src="/static/photos/{{ my_profile.photo }}" style="width:80px; height:80px; object-fit:cover;">
+                {% else %}
+                👤
+                {% endif %}
+            </div>
+            <div>
+                <h3 style="color:#10b981; font-size:20px;">{{ my_profile.name }}</h3>
+                <p style="color:#94a3b8; font-size:14px;">{{ my_profile.degree }} • {{ my_profile.college }}</p>
+                <p style="color:#64748b; font-size:14px;">💻 {{ my_profile.primary_skill }} • 📍 {{ my_profile.city }}</p>
+            </div>
+        </div>
+
+        <div style="margin-top:20px; display:flex; gap:10px; flex-wrap:wrap;">
+            <a href="/my-profile" class="btn">View Full Profile 👁️</a>
+            <a href="/edit-profile" class="btn" style="background:#1e293b; border:1px solid #334155;">Edit Profile ✏️</a>
+            <a href="/my-applications" class="btn" style="background:#1e293b; border:1px solid #334155;">My Applications 📝</a>
+        </div>
+
+        <!-- Resume Upload -->
+        <form method="POST" action="/upload-resume" enctype="multipart/form-data" style="margin-top:20px;">
+            <p style="font-weight:600; color:#10b981; margin-bottom:10px;">📄 Resume</p>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <input type="file" name="resume" accept=".pdf" style="border:2px solid #e2e8f0; padding:8px; border-radius:10px; font-size:13px; font-family:'Poppins',sans-serif;">
+                <button type="submit" class="btn" style="padding:9px 20px; font-size:13px;">Upload 📄</button>
+            </div>
+            {% if my_profile.resume %}
+            <p style="margin-top:8px; font-size:13px; color:#10b981;">
+                ✅ Resume uploaded —
+                <a href="/static/resumes/{{ my_profile.resume }}" target="_blank" style="color:#10b981; font-weight:600;">View Resume</a>
+            </p>
+            {% endif %}
+        </form>
+
+        <!-- Photo Upload -->
+        <form method="POST" action="/upload-photo" enctype="multipart/form-data" style="margin-top:20px;">
+            <p style="font-weight:600; color:#10b981; margin-bottom:10px;">📸 Profile Photo</p>
+            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <input type="file" name="photo" accept=".jpg,.jpeg,.png" style="border:2px solid #e2e8f0; padding:8px; border-radius:10px; font-size:13px; font-family:'Poppins',sans-serif;">
+                <button type="submit" class="btn" style="padding:9px 20px; font-size:13px;">Upload 📸</button>
+            </div>
+        </form>
+
+        {% else %}
+        <div style="text-align:center; padding:30px;">
+            <p style="color:#94a3b8; margin-bottom:15px;">You haven't created a profile yet!</p>
+            <a href="/profile" class="btn">Create Profile Now</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- My Posted Jobs — only show for hirers -->
+    {% if session.get('role') == 'hirer' %}
+    <div style="margin-top:30px;">
+        <h2 class="section-title">My Posted Jobs 💼</h2>
+        {% if my_jobs %}
+        <div class="cards-grid">
+            {% for job in my_jobs %}
+            <div class="card">
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+                    <div style="width:48px; height:48px; background:#ecfdf5; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">🏢</div>
+                    <div>
+                        <h3 style="margin:0; font-size:17px;">{{ job.job_title }}</h3>
+                        <p style="margin:0; color:#94a3b8; font-size:13px;">{{ job.company }}</p>
+                    </div>
+                </div>
+                <p style="font-size:13px; color:#64748b;">📍 {{ job.location }}</p>
+                <p style="font-size:13px; color:#64748b;">💰 {{ job.salary }}</p>
+                <a href="/delete-job/{{ job.id }}" onclick="return confirm('Delete this job?')"
+                   style="color:#dc2626; font-size:13px; font-weight:600; text-decoration:none; display:block; margin-top:10px;">🗑️ Delete Job</a>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <span class="empty-icon">💼</span>
+            <h3>No jobs posted yet!</h3>
+            <p>Post your first job opportunity.</p>
+            <a href="/post-job" class="btn">Post a Job</a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Admin Panel -->
+    {% if is_admin %}
+    <div class="card" style="margin-top:30px; text-align:center; background:#ecfdf5; border:1px solid #a7f3d0;">
+        <h3 style="color:#059669; margin-bottom:10px;">🛠️ Admin Panel</h3>
+        <p style="color:#64748b; font-size:14px; margin-bottom:15px;">Manage all users, jobs and profiles</p>
+        <a href="/admin" class="btn">Go to Admin Panel →</a>
+    </div>
+    {% endif %}
+
+</div>
+
+<footer>
+    © 2026 <span>FreshHire</span> — Built for Freshers 💚
+</footer>
+
+<script>
+function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+</script>
+
+</body>
+</html>

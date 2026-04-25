@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Panel - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🚀 FreshHire</h2>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/admin">Admin Panel</a>
+        <span>Hi, {{ session.get('name') }}!</span>
+        <a href="/logout">Logout</a>
+    </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container">
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div style="background: linear-gradient(135deg, #16a34a, #15803d); padding:40px 20px; text-align:center; color:white;">
+    <h1 style="font-size:32px; font-weight:800;">Admin Panel 🛠️</h1>
+    <p style="opacity:0.9;">Manage all users, jobs and profiles</p>
+</div>
+
+<div class="container">
+
+    <!-- Stats -->
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:20px; margin-top:30px;">
+        <div class="card" style="text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">👥</div>
+            <h2 style="color:#16a34a; font-size:36px;">{{ users|length }}</h2>
+            <p style="color:#888;">Total Users</p>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">💼</div>
+            <h2 style="color:#16a34a; font-size:36px;">{{ jobs|length }}</h2>
+            <p style="color:#888;">Total Jobs</p>
+        </div>
+        <div class="card" style="text-align:center;">
+            <div style="font-size:40px; margin-bottom:10px;">👨‍💻</div>
+            <h2 style="color:#16a34a; font-size:36px;">{{ profiles|length }}</h2>
+            <p style="color:#888;">Total Profiles</p>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card" style="margin-top:30px;">
+        <h2 class="section-title">All Users 👥</h2>
+        <table style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr style="background:#f0fdf4;">
+                    <th style="padding:12px; text-align:left; color:#16a34a;">ID</th>
+                    <th style="padding:12px; text-align:left; color:#16a34a;">Name</th>
+                    <th style="padding:12px; text-align:left; color:#16a34a;">Email</th>
+                    <th style="padding:12px; text-align:left; color:#16a34a;">Username</th>
+                    <th style="padding:12px; text-align:left; color:#16a34a;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr style="border-bottom:1px solid #e5e7eb;">
+                    <td style="padding:12px;">{{ user.id }}</td>
+                    <td style="padding:12px;">{{ user.first_name }} {{ user.last_name }}</td>
+                    <td style="padding:12px;">{{ user.email }}</td>
+                    <td style="padding:12px;">{{ user.username }}</td>
+                    <td style="padding:12px;">
+                        <a href="/admin/delete-user/{{ user.id }}"
+                           onclick="return confirm('Delete this user?')"
+                           style="color:#dc2626; font-size:13px; font-weight:600;">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Jobs Table -->
+    <div class="card" style="margin-top:30px;">
+        <h2 class="section-title">All Jobs 💼</h2>
+        <table style="width:100%; border-collapse:collapse;">
+            <thead>
+                <tr style="background:#f0fdf4;">
+                    <th style="padding:12px; text-align:left; color:#16a34a;">ID</th>
+                    <th style="padding:12px; text-align:left; color:#16a34a;">Job Title</th>
+                    <th style="padding:12px; text-align:left; color:#16a34a;">Company</th>
+                    <th style="padding:12px; text-align:left; color:#16a34a;">Location</th>
+                    <th style="padding:12px; text-align:left; color:#16a34a;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for job in jobs %}
+                <tr style="border-bottom:1px solid #e5e7eb;">
+                    <td style="padding:12px;">{{ job.id }}</td>
+                    <td style="padding:12px;">{{ job.job_title }}</td>
+                    <td style="padding:12px;">{{ job.company }}</td>
+                    <td style="padding:12px;">{{ job.location }}</td>
+                    <td style="padding:12px;">
+                        <a href="/admin/delete-job/{{ job.id }}"
+                           onclick="return confirm('Delete this job?')"
+                           style="color:#dc2626; font-size:13px; font-weight:600;">Delete</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<footer>
+    © 2026 FreshHire — Built for Freshers 💚
+</footer>
+
+</body>
+</html>

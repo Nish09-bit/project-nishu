@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recommended Jobs - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🚀 FreshHire</h2>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        {% if session.get('user_id') %}
+            <a href="/recommendations">⭐ For You</a>
+            <a href="/dashboard">Dashboard</a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+</nav>
+
+<div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding:60px 20px; text-align:center; color:white;">
+    <h1 style="font-size:36px; font-weight:800; margin-bottom:10px;">Jobs For You ⭐</h1>
+    <p style="font-size:16px; color:#94a3b8;">Based on your skill: <b style="color:#10b981;">{{ skill }}</b></p>
+</div>
+
+<div class="container">
+    <div class="cards-grid" style="margin-top:30px;">
+        {% for job in jobs %}
+        <div class="card">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+                <div style="width:48px; height:48px; background:#ecfdf5; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">🏢</div>
+                <div>
+                    <h3 style="margin:0; font-size:17px;">{{ job.job_title }}</h3>
+                    <p style="margin:0; color:#94a3b8; font-size:13px;">{{ job.company }}</p>
+                </div>
+            </div>
+            <p style="font-size:13px; color:#64748b; margin-bottom:6px;">📍 {{ job.location }}</p>
+            <p style="font-size:13px; color:#64748b; margin-bottom:10px;">💰 {{ job.salary }}</p>
+            {% if job.required_skills %}
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;">
+                {% for s in job.required_skills.split(',') %}
+                <span style="background:#ecfdf5; color:#059669; padding:4px 10px; border-radius:20px; font-size:11px; border:1px solid #a7f3d0; font-weight:600;">{{ s.strip() }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <a href="/job/{{ job.id }}" style="display:block; text-align:center; margin-bottom:8px; color:#10b981; font-size:13px; font-weight:600;">View Details →</a>
+            <a href="/apply/{{ job.id }}" class="btn" style="width:100%; text-align:center; display:block;">Apply Now →</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not jobs %}
+    <div class="empty-state">
+        <span class="empty-icon">⭐</span>
+        <h3>No recommendations yet!</h3>
+        <p>Add more skills to your profile to get better recommendations.</p>
+        <a href="/edit-profile" class="btn">Update Profile</a>
+    </div>
+    {% endif %}
+</div>
+
+<footer>
+    © 2026 <span>FreshHire</span> — Built for Freshers 💚
+</footer>
+
+</body>
+</html>

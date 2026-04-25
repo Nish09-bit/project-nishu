@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <head>
+    <title>About - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🚀 FreshHire</h2>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        {% if session.get('role') == 'hirer' %}
+<a href="/post-job">Post Job</a>
+{% endif %}
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        {% if session.get('user_id') %}
+            <a href="/bookmarks">🔖 Bookmarks</a>
+            <a href="/dashboard">Dashboard</a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+</nav>
+
+<div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding:60px 20px; text-align:center; color:white;">
+    <h1 style="font-size:36px; font-weight:800; margin-bottom:10px;">About FreshHire 🚀</h1>
+    <p style="font-size:16px; color:#94a3b8;">Built for freshers, by freshers</p>
+</div>
+
+<div class="about-container">
+
+    <h2>What is FreshHire?</h2>
+    <p>FreshHire is a job portal built exclusively for fresh graduates and students. We connect talented freshers with companies looking for new talent — no experience required!</p>
+
+    <h2 style="margin-top:30px;">Our Mission 🎯</h2>
+    <p>We believe every fresher deserves a fair chance. Our mission is to bridge the gap between talented students and companies who want to hire them.</p>
+
+    <h2 style="margin-top:30px;">What You Can Do Here ✅</h2>
+    <ul>
+        <li>Create your professional profile</li>
+        <li>Browse hundreds of fresher-friendly jobs</li>
+        <li>Apply directly to companies</li>
+        <li>Get discovered by top recruiters</li>
+        <li>Post jobs if you're a recruiter</li>
+        <li>Chat with other freshers</li>
+        <li>Bookmark jobs for later</li>
+    </ul>
+
+    <h2 style="margin-top:30px;">Why FreshHire? 💚</h2>
+    <p>Unlike other job portals that require years of experience, FreshHire is designed specifically for people just starting their careers. We make it easy, fast, and free!</p>
+
+    <div style="background:#f0fdf4; border-radius:16px; padding:30px; margin-top:30px; text-align:center; border:1px solid #a7f3d0;">
+        <h3 style="color:#059669; margin-bottom:10px; font-size:20px;">Ready to get started? 🎉</h3>
+        <p style="color:#64748b; margin-bottom:20px;">Join thousands of freshers already on FreshHire!</p>
+        <a href="/signup" class="btn" style="margin-right:10px;">Sign Up Free</a>
+        <a href="/jobs" class="btn" style="background:#1e293b;">Browse Jobs</a>
+    </div>
+
+</div>
+
+<footer>
+    © 2026 <span>FreshHire</span> — Built for Freshers 💚
+</footer>
+
+</body>
+</html>

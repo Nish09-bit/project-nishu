@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sign Up - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body style="background: linear-gradient(135deg, #0f172a, #1e293b); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 0;">
+
+<div class="form-container" style="width:480px;">
+
+    <div style="text-align:center; margin-bottom:25px;">
+        <span style="font-size:40px;">👋</span>
+        <h2 style="margin-top:10px;">Create Account</h2>
+        <p style="color:#94a3b8; font-size:14px;">Join FreshHire — it's free!</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Role Selection -->
+    <p style="font-weight:700; color:#10b981; margin-bottom:12px; text-align:center; font-size:15px;">I am joining as...</p>
+
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:25px;">
+
+        <div onclick="selectRole('fresher')" id="fresher-card"
+             style="border:2px solid #10b981; border-radius:14px; padding:20px; text-align:center; cursor:pointer; background:rgba(16,185,129,0.1);">
+            <div style="font-size:35px; margin-bottom:8px;">🎓</div>
+            <p style="font-weight:700; color:white; margin:0; font-size:15px;">Fresher</p>
+            <p style="font-size:12px; color:#94a3b8; margin:5px 0 0;">Looking for a job</p>
+        </div>
+
+        <div onclick="selectRole('hirer')" id="hirer-card"
+             style="border:2px solid #334155; border-radius:14px; padding:20px; text-align:center; cursor:pointer; background:transparent;">
+            <div style="font-size:35px; margin-bottom:8px;">🏢</div>
+            <p style="font-weight:700; color:white; margin:0; font-size:15px;">Hirer</p>
+            <p style="font-size:12px; color:#94a3b8; margin:5px 0 0;">Want to hire talent</p>
+        </div>
+
+    </div>
+
+    <form method="POST" action="/signup">
+        <input type="hidden" name="role" id="role-input" value="fresher">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <input type="text" name="first_name" placeholder="First Name" required>
+            <input type="text" name="last_name" placeholder="Last Name">
+        </div>
+        <input type="email" name="email" placeholder="📧 Email Address" required>
+        <input type="text" name="username" placeholder="👤 Username" required>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <input type="password" name="password" placeholder="🔒 Password" required>
+            <input type="password" name="confirm_password" placeholder="🔒 Confirm" required>
+        </div>
+
+        <button type="submit" id="signup-btn" style="margin-top:5px;">
+            Join as Fresher 🎓
+        </button>
+    </form>
+
+    <p style="text-align:center; margin-top:20px; color:#64748b;">
+        Already have an account? <a href="/login">Login</a>
+    </p>
+    <p style="text-align:center; margin-top:5px;">
+        <a href="/" style="color:#475569; font-size:13px;">← Back to Home</a>
+    </p>
+
+</div>
+
+<script>
+function selectRole(role) {
+    var fresherCard = document.getElementById('fresher-card');
+    var hirerCard   = document.getElementById('hirer-card');
+    var roleInput   = document.getElementById('role-input');
+    var signupBtn   = document.getElementById('signup-btn');
+
+    if (role === 'fresher') {
+        fresherCard.style.border     = '2px solid #10b981';
+        fresherCard.style.background = 'rgba(16,185,129,0.1)';
+        hirerCard.style.border       = '2px solid #334155';
+        hirerCard.style.background   = 'transparent';
+        roleInput.value              = 'fresher';
+        signupBtn.innerHTML          = 'Join as Fresher 🎓';
+    } else {
+        hirerCard.style.border       = '2px solid #10b981';
+        hirerCard.style.background   = 'rgba(16,185,129,0.1)';
+        fresherCard.style.border     = '2px solid #334155';
+        fresherCard.style.background = 'transparent';
+        roleInput.value              = 'hirer';
+        signupBtn.innerHTML          = 'Join as Hirer 🏢';
+    }
+}
+</script>
+
+</body>
+</html>

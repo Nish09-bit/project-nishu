@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .chat-box {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            height: 420px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+        .msg-sent {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 12px;
+        }
+        .msg-received {
+            display: flex;
+            justify-content: flex-start;
+            margin-bottom: 12px;
+        }
+        .msg-bubble-sent {
+            max-width: 65%;
+            padding: 10px 16px;
+            border-radius: 16px 16px 4px 16px;
+            background: #10b981;
+            color: white;
+            font-size: 14px;
+        }
+        .msg-bubble-received {
+            max-width: 65%;
+            padding: 10px 16px;
+            border-radius: 16px 16px 16px 4px;
+            background: #f1f5f9;
+            color: #1a1a2e;
+            font-size: 14px;
+        }
+        .msg-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+        .chat-input-row {
+            display: flex;
+            gap: 10px;
+        }
+        .chat-input-row input {
+            flex: 1;
+            padding: 13px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+        }
+        .chat-input-row input:focus { border-color: #10b981; }
+    </style>
+</head>
+<body>
+
+<nav>
+    <h2 style="display:flex; align-items:center; gap:6px;">
+        <img src="/static/logo.png" alt="logo" style="height:28px;">
+        <span style="font-size:22px; font-weight:bold; color:white;">FreshHire</span>
+    </h2>
+    <div class="nav-links" id="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        {% if session.get('role') == 'hirer' %}
+        <a href="/post-job">Post Job</a>
+        {% endif %}
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        {% if session.get('user_id') %}
+            <a href="/my-profile">My Profile</a>
+            <a href="/bookmarks">🔖 Bookmarks</a>
+            <a href="/notifications">🔔
+                {% if notif_count > 0 %}
+                <span style="background:#dc2626; color:white; border-radius:50%; padding:2px 6px; font-size:11px;">{{ notif_count }}</span>
+                {% endif %}
+            </a>
+            <a href="/dashboard">Dashboard</a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+    <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+        <span></span><span></span><span></span>
+    </div>
+</nav>
+
+<div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding:30px 20px; text-align:center; color:white;">
+    <h1 style="font-size:24px; font-weight:800;">💬 Chat with {{ receiver.first_name }} {{ receiver.last_name }}</h1>
+    <p style="color:#94a3b8; font-size:14px;">Messages are private between you two</p>
+</div>
+
+<div style="max-width:700px; margin:30px auto; padding:0 20px 40px;">
+
+    <!-- Chat Messages -->
+    <div class="chat-box" id="chatbox">
+        {% for msg in messages %}
+            {% if msg.sender_id == session.get('user_id') %}
+            <div class="msg-sent">
+                <div class="msg-bubble-sent">
+                    <p style="margin:0;">{{ msg.message }}</p>
+                    <p class="msg-time">{{ msg.sent_at }}</p>
+                </div>
+            </div>
+            {% else %}
+            <div class="msg-received">
+                <div class="msg-bubble-received">
+                    <p style="margin:0; font-weight:600; font-size:12px; color:#10b981;">{{ msg.first_name }}</p>
+                    <p style="margin:0;">{{ msg.message }}</p>
+                    <p class="msg-time">{{ msg.sent_at }}</p>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+
+        {% if not messages %}
+        <div style="text-align:center; padding:60px 20px; color:#94a3b8;">
+            <p style="font-size:40px; margin-bottom:10px;">👋</p>
+            <p>Say hello to {{ receiver.first_name }}!</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Message Input -->
+    <form method="POST" action="/chat/{{ receiver_id }}">
+        <div class="chat-input-row">
+            <input type="text" name="message" placeholder="Type a message..." required autocomplete="off">
+            <button type="submit" class="btn" style="padding:13px 25px;">Send 🚀</button>
+        </div>
+    </form>
+
+    <p style="text-align:center; margin-top:15px;">
+        <a href="/profiles" style="color:#94a3b8; font-size:13px;">← Back to Freshers</a>
+    </p>
+</div>
+
+<footer>© 2026 <span>FreshHire</span> — Built for Freshers 💚</footer>
+
+<script>
+// Auto scroll to bottom
+var chatbox = document.getElementById('chatbox');
+chatbox.scrollTop = chatbox.scrollHeight;
+
+function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+</script>
+</body>
+</html>

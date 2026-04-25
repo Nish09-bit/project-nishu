@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Job Detail - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🚀 FreshHire</h2>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        <a href="/post-job">Post Job</a>
+        <a href="/about">About</a>
+        {% if session.get('user_id') %}
+            <a href="/profile">My Profile</a>
+            <a href="/dashboard">Dashboard</a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+</nav>
+
+<div class="container" style="max-width:750px; margin-top:40px;">
+
+    <!-- Back button -->
+    <a href="/jobs" style="color:#16a34a; font-size:14px; text-decoration:none;">← Back to Jobs</a>
+
+    <div class="card" style="margin-top:20px; padding:35px;">
+
+        <!-- Header -->
+        <div style="display:flex; align-items:center; gap:20px; margin-bottom:25px;">
+            <div style="width:70px; height:70px; background:#d1fae5; border-radius:16px; display:flex; align-items:center; justify-content:center; font-size:32px;">🏢</div>
+            <div>
+                <h1 style="font-size:26px; color:#15803d; margin:0;">{{ job.job_title }}</h1>
+                <p style="color:#888; font-size:15px; margin:5px 0;">{{ job.company }}</p>
+            </div>
+        </div>
+
+        <!-- Info Row -->
+        <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:25px;">
+            <span style="background:#f0fdf4; color:#16a34a; padding:8px 16px; border-radius:20px; font-size:13px; border:1px solid #bbf7d0;">📍 {{ job.location }}</span>
+            <span style="background:#f0fdf4; color:#16a34a; padding:8px 16px; border-radius:20px; font-size:13px; border:1px solid #bbf7d0;">💰 {{ job.salary }}</span>
+        </div>
+
+        <!-- Skills -->
+        {% if job.required_skills %}
+        <div style="margin-bottom:25px;">
+            <h3 style="color:#1a1a1a; margin-bottom:12px;">Required Skills</h3>
+            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                {% for skill in job.required_skills.split(',') %}
+                <span style="background:#d1fae5; color:#16a34a; padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600;">{{ skill.strip() }}</span>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Description -->
+        {% if job.description %}
+        <div style="margin-bottom:25px;">
+            <h3 style="color:#1a1a1a; margin-bottom:12px;">Job Description</h3>
+            <p style="color:#555; line-height:1.8; font-size:15px;">{{ job.description }}</p>
+        </div>
+        {% endif %}
+
+        <!-- Apply Button -->
+        {% if job.apply_link %}
+        <a href="{{ job.apply_link }}" target="_blank" class="btn" style="font-size:16px; padding:14px 30px;">
+            Apply Now →
+        </a>
+        {% endif %}
+
+        <!-- Delete button (only for job poster) -->
+        {% if session.get('user_id') == job.posted_by %}
+        <a href="/delete-job/{{ job.id }}" onclick="return confirm('Are you sure?')" 
+           style="margin-left:15px; color:#dc2626; font-size:14px; text-decoration:none;">
+            🗑️ Delete Job
+        </a>
+        {% endif %}
+
+    </div>
+</div>
+
+<footer>
+    © 2026 FreshHire — Built for Freshers 💚
+</footer>
+
+</body>
+</html>

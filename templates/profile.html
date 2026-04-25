@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Profile - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🚀 FreshHire</h2>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        {% if session.get('role') == 'hirer' %}
+<a href="/post-job">Post Job</a>
+{% endif %}
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        {% if session.get('user_id') %}
+            <a href="/bookmarks">🔖 Bookmarks</a>
+            <a href="/dashboard">Dashboard</a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container">
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding:60px 20px; text-align:center; color:white;">
+    <h1 style="font-size:36px; font-weight:800; margin-bottom:10px;">Create Profile 👤</h1>
+    <p style="font-size:16px; color:#94a3b8;">Showcase yourself to top companies</p>
+</div>
+
+<div class="form-container" style="max-width:600px; margin-top:40px; margin-bottom:40px;">
+
+    <form method="POST" action="/profile" enctype="multipart/form-data">
+
+        <!-- Profile Photo -->
+        <div style="text-align:center; margin-bottom:25px;">
+            <div style="width:100px; height:100px; background:#ecfdf5; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px; font-size:45px; overflow:hidden; border:3px solid #10b981;" id="photo-preview">👤</div>
+            <label style="cursor:pointer; color:#10b981; font-weight:600; font-size:14px; background:#ecfdf5; padding:8px 20px; border-radius:20px; border:1px solid #a7f3d0;">
+                📸 Upload Photo
+                <input type="file" name="photo" accept=".jpg,.jpeg,.png" style="display:none;" onchange="previewPhoto(this)">
+            </label>
+        </div>
+
+        <p style="font-weight:700; color:#10b981; margin-bottom:10px;">📋 Personal Info</p>
+        <input type="text" name="name" placeholder="Full Name" required>
+        <input type="email" name="email" placeholder="Email Address" required>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <input type="text" name="phone" placeholder="Phone Number">
+            <input type="text" name="city" placeholder="City">
+        </div>
+        <textarea name="bio" placeholder="About yourself — write 2-3 lines" rows="3"></textarea>
+
+        <p style="font-weight:700; color:#10b981; margin-bottom:10px; margin-top:10px;">🎓 Education</p>
+        <input type="text" name="college" placeholder="College Name">
+        <input type="text" name="degree" placeholder="Degree (e.g. B.Tech, BCA, BSc)">
+
+        <p style="font-weight:700; color:#10b981; margin-bottom:10px; margin-top:10px;">💻 Skills</p>
+        <input type="text" name="primary_skill" placeholder="Skills (e.g. Python, React, Java)">
+
+        <p style="font-weight:700; color:#10b981; margin-bottom:10px; margin-top:10px;">🚀 Project</p>
+        <input type="text" name="project_title" placeholder="Project Title">
+        <input type="text" name="project_link" placeholder="Project Link (GitHub / Live URL)">
+        <textarea name="project_desc" placeholder="Project Description" rows="3"></textarea>
+
+        <button type="submit" style="margin-top:10px;">Save Profile 🎉</button>
+    </form>
+
+    <p style="text-align:center; margin-top:15px;">
+        <a href="/" style="color:#94a3b8; font-size:13px;">← Back to Home</a>
+    </p>
+</div>
+
+<footer>
+    © 2026 <span>FreshHire</span> — Built for Freshers 💚
+</footer>
+
+<script>
+function previewPhoto(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('photo-preview').innerHTML =
+                '<img src="' + e.target.result + '" style="width:100px; height:100px; border-radius:50%; object-fit:cover;">';
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+
+</body>
+</html>

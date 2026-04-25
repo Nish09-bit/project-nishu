@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Post Job - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🚀 FreshHire</h2>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        {% if session.get('role') == 'hirer' %}
+<a href="/post-job">Post Job</a>
+{% endif %}
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        {% if session.get('user_id') %}
+            <a href="/bookmarks">🔖 Bookmarks</a>
+            <a href="/dashboard">Dashboard</a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container">
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding:60px 20px; text-align:center; color:white;">
+    <h1 style="font-size:36px; font-weight:800; margin-bottom:10px;">Post a Job 💼</h1>
+    <p style="font-size:16px; color:#94a3b8;">Find the perfect fresher for your company</p>
+</div>
+
+<div class="form-container" style="max-width:600px; margin-top:40px; margin-bottom:40px;">
+    <div style="text-align:center; margin-bottom:25px;">
+        <span style="font-size:40px;">💼</span>
+        <h2 style="margin-top:10px;">Job Details</h2>
+        <p style="color:#94a3b8; font-size:14px;">Fill in the details below</p>
+    </div>
+
+    <form method="POST" action="/post-job">
+        <input type="text" name="job_title" placeholder="Job Title (e.g. Python Developer)" required>
+        <input type="text" name="company" placeholder="Company Name" required>
+        <input type="text" name="location" placeholder="Location (e.g. Bangalore, Remote)" required>
+        <input type="text" name="required_skills" placeholder="Skills Required (e.g. Python, Django, SQL)">
+        <input type="text" name="salary" placeholder="Salary (e.g. 3-5 LPA)">
+        <input type="text" name="apply_link" placeholder="Apply Link (e.g. https://...)">
+        <textarea name="description" placeholder="Job Description" rows="4" style="resize:vertical;"></textarea>
+        <button type="submit">Post Job 🚀</button>
+    </form>
+
+    <p style="text-align:center; margin-top:15px;">
+        <a href="/" style="color:#94a3b8; font-size:13px;">← Back to Home</a>
+    </p>
+</div>
+
+<footer>
+    © 2026 <span>FreshHire</span> — Built for Freshers 💚
+</footer>
+
+</body>
+</html>

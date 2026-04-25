@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Bookmarks - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🚀 FreshHire</h2>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        <a href="/post-job">Post Job</a>
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        {% if session.get('user_id') %}
+            <a href="/dashboard">Dashboard</a>
+            <a href="/bookmarks">Bookmarks</a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container">
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div style="background: linear-gradient(135deg, #16a34a, #15803d); padding:50px 20px; text-align:center; color:white;">
+    <h1 style="font-size:36px; font-weight:800; margin-bottom:10px;">My Bookmarks 🔖</h1>
+    <p style="font-size:16px; opacity:0.9;">Jobs you saved for later</p>
+</div>
+
+<div class="container">
+    <div class="cards-grid" style="margin-top:30px;">
+        {% for job in jobs %}
+        <div class="card">
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
+                <div style="width:48px; height:48px; background:#d1fae5; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">🏢</div>
+                <div>
+                    <h3 style="margin:0; font-size:17px;">{{ job.job_title }}</h3>
+                    <p style="margin:0; color:#888; font-size:13px;">{{ job.company }}</p>
+                </div>
+            </div>
+            <p style="font-size:13px; color:#555; margin-bottom:6px;">📍 {{ job.location }}</p>
+            <p style="font-size:13px; color:#555; margin-bottom:10px;">💰 {{ job.salary }}</p>
+            {% if job.required_skills %}
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;">
+                {% for skill in job.required_skills.split(',') %}
+                <span style="background:#f0fdf4; color:#16a34a; padding:4px 10px; border-radius:20px; font-size:11px; border:1px solid #bbf7d0;">{{ skill.strip() }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <a href="/job/{{ job.id }}" style="display:block; text-align:center; margin-bottom:8px; color:#16a34a; font-size:13px; font-weight:600;">View Details →</a>
+            <a href="/bookmark/{{ job.id }}" class="btn" style="width:100%; text-align:center; display:block; background:#dc2626;">Remove Bookmark 🗑️</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not jobs %}
+    <div style="text-align:center; padding:80px 20px;">
+        <div style="font-size:60px; margin-bottom:20px;">🔖</div>
+        <h3 style="color:#16a34a; font-size:22px; margin-bottom:10px;">No bookmarks yet!</h3>
+        <p style="color:#888; margin-bottom:20px;">Save jobs you like for later.</p>
+        <a href="/jobs" class="btn">Browse Jobs</a>
+    </div>
+    {% endif %}
+</div>
+
+<footer>
+    © 2026 FreshHire — Built for Freshers 💚
+</footer>
+
+</body>
+</html>

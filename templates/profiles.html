@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Freshers - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<nav>
+    <h2>🚀 FreshHire</h2>
+    <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/jobs">Jobs</a>
+        <a href="/profiles">Freshers</a>
+        {% if session.get('role') == 'hirer' %}
+<a href="/post-job">Post Job</a>
+{% endif %}
+        <a href="/about">About</a>
+        <a href="/contact">Contact</a>
+        {% if session.get('user_id') %}
+            <a href="/bookmarks">🔖 Bookmarks</a>
+            <a href="/dashboard">Dashboard</a>
+            <span>Hi, {{ session.get('name') }}!</span>
+            <a href="/logout">Logout</a>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Sign Up</a>
+        {% endif %}
+    </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container">
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding:60px 20px; text-align:center; color:white;">
+    <h1 style="font-size:36px; font-weight:800; margin-bottom:10px;">Meet Our Freshers 👨‍💻</h1>
+    <p style="font-size:16px; color:#94a3b8;">Talented students & graduates looking for their first opportunity</p>
+</div>
+
+<div class="container">
+    <div class="cards-grid" style="margin-top:30px;">
+        {% for p in profiles %}
+        <div class="card" style="text-align:center;">
+            <div style="width:70px; height:70px; background:#ecfdf5; border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 15px; font-size:30px;">
+                {% if p.photo %}
+                <img src="/static/photos/{{ p.photo }}" style="width:70px; height:70px; border-radius:50%; object-fit:cover;">
+                {% else %}
+                👤
+                {% endif %}
+            </div>
+            <h3 style="font-size:18px; margin-bottom:5px;">{{ p.name }}</h3>
+            <p style="color:#10b981; font-weight:600; margin-bottom:10px; font-size:14px;">{{ p.primary_skill }}</p>
+            <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+                {% if p.college %}
+                <span style="background:#ecfdf5; color:#059669; padding:4px 12px; border-radius:20px; font-size:12px; border:1px solid #a7f3d0;">🎓 {{ p.college }}</span>
+                {% endif %}
+                {% if p.city %}
+                <span style="background:#ecfdf5; color:#059669; padding:4px 12px; border-radius:20px; font-size:12px; border:1px solid #a7f3d0;">📍 {{ p.city }}</span>
+                {% endif %}
+            </div>
+            {% if p.bio %}
+            <p style="font-size:13px; color:#64748b; margin-bottom:15px; line-height:1.6;">{{ p.bio[:100] }}{% if p.bio|length > 100 %}...{% endif %}</p>
+            {% endif %}
+            <div style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap;">
+                {% if p.project_link %}
+                <a href="{{ p.project_link }}" target="_blank" class="btn" style="font-size:13px; padding:8px 16px;">View Project →</a>
+                {% endif %}
+                <a href="/chat/{{ p.user_id }}" class="btn" style="font-size:13px; padding:8px 16px; background:#1e293b; border:1px solid #334155;">💬 Chat</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not profiles %}
+    <div class="empty-state">
+        <span class="empty-icon">👨‍💻</span>
+        <h3>No profiles yet!</h3>
+        <p>Be the first to create your profile.</p>
+        <a href="/profile" class="btn">Create My Profile</a>
+    </div>
+    {% endif %}
+</div>
+
+<footer>
+    © 2026 <span>FreshHire</span> — Built for Freshers 💚
+</footer>
+
+</body>
+</html>

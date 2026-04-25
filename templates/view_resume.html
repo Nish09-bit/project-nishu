@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Resume - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="/static/favicon.png" type="image/png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @media print {
+            nav, footer, .no-print { display: none !important; }
+            body { background: white !important; }
+            .resume-paper { box-shadow: none !important; margin: 0 !important; border-radius: 0 !important; }
+        }
+    </style>
+</head>
+<body>
+<nav class="no-print">
+    <a href="/" style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+        <img src="/static/logo.png" alt="logo" style="height:32px;">
+        <span style="color:white; font-weight:800; font-size:20px;">FreshHire</span>
+    </a>
+    <div class="nav-links" id="nav-links">
+        <a href="/resume-builder">Edit Resume ✏️</a>
+        <a href="/dashboard">Dashboard</a>
+        <a href="/logout">Logout</a>
+    </div>
+    <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+        <span></span><span></span><span></span>
+    </div>
+</nav>
+
+<div class="no-print" style="background:#1e293b; padding:20px; text-align:center; border-bottom:1px solid #334155;">
+    <button onclick="window.print()" class="btn" style="margin-right:10px;">🖨️ Print / Save as PDF</button>
+    <a href="/resume-builder" class="btn" style="background:#334155;">✏️ Edit Resume</a>
+</div>
+
+<!-- Resume Paper -->
+<div class="resume-paper" style="max-width:750px; margin:40px auto 60px; background:white; padding:50px; border-radius:16px; box-shadow:0 10px 40px rgba(0,0,0,0.1); border:1px solid #e2e8f0;">
+
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid #10b981; padding-bottom:20px; margin-bottom:25px;">
+        <div>
+            <h1 style="font-size:32px; color:#1a1a2e; font-weight:800; margin-bottom:5px;">{{ profile.name if profile else 'Your Name' }}</h1>
+            <p style="color:#10b981; font-size:16px; font-weight:600; margin-bottom:8px;">{{ profile.primary_skill if profile else '' }}</p>
+            <div style="display:flex; gap:15px; flex-wrap:wrap;">
+                {% if profile and profile.email %}
+                <span style="color:#64748b; font-size:13px;">📧 {{ profile.email }}</span>
+                {% endif %}
+                {% if profile and profile.phone %}
+                <span style="color:#64748b; font-size:13px;">📱 {{ profile.phone }}</span>
+                {% endif %}
+                {% if profile and profile.city %}
+                <span style="color:#64748b; font-size:13px;">📍 {{ profile.city }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% if profile and profile.photo %}
+        <img src="/static/photos/{{ profile.photo }}" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:3px solid #10b981;">
+        {% endif %}
+    </div>
+
+    <!-- Objective -->
+    {% if resume.objective %}
+    <div style="margin-bottom:25px;">
+        <h2 style="font-size:14px; font-weight:800; color:#10b981; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #e2e8f0;">Career Objective</h2>
+        <p style="color:#64748b; font-size:14px; line-height:1.8;">{{ resume.objective }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Education -->
+    {% if resume.education %}
+    <div style="margin-bottom:25px;">
+        <h2 style="font-size:14px; font-weight:800; color:#10b981; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #e2e8f0;">Education</h2>
+        <p style="color:#64748b; font-size:14px; line-height:1.8; white-space:pre-line;">{{ resume.education }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Skills -->
+    {% if resume.skills %}
+    <div style="margin-bottom:25px;">
+        <h2 style="font-size:14px; font-weight:800; color:#10b981; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #e2e8f0;">Skills</h2>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            {% for skill in resume.skills.split(',') %}
+            <span style="background:#ecfdf5; color:#059669; padding:5px 14px; border-radius:20px; font-size:13px; font-weight:600; border:1px solid #a7f3d0;">{{ skill.strip() }}</span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Experience -->
+    {% if resume.experience %}
+    <div style="margin-bottom:25px;">
+        <h2 style="font-size:14px; font-weight:800; color:#10b981; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #e2e8f0;">Experience</h2>
+        <p style="color:#64748b; font-size:14px; line-height:1.8; white-space:pre-line;">{{ resume.experience }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Project -->
+    {% if profile and profile.project_title %}
+    <div style="margin-bottom:25px;">
+        <h2 style="font-size:14px; font-weight:800; color:#10b981; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #e2e8f0;">Projects</h2>
+        <p style="color:#1a1a2e; font-size:14px; font-weight:700; margin-bottom:5px;">{{ profile.project_title }}</p>
+        <p style="color:#64748b; font-size:13px; line-height:1.6; margin-bottom:5px;">{{ profile.project_desc }}</p>
+        {% if profile.project_link %}
+        <a href="{{ profile.project_link }}" style="color:#10b981; font-size:13px;">{{ profile.project_link }}</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Certifications -->
+    {% if resume.certifications %}
+    <div style="margin-bottom:25px;">
+        <h2 style="font-size:14px; font-weight:800; color:#10b981; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #e2e8f0;">Certifications</h2>
+        <p style="color:#64748b; font-size:14px; line-height:1.8; white-space:pre-line;">{{ resume.certifications }}</p>
+    </div>
+    {% endif %}
+
+    <!-- Languages -->
+    {% if resume.languages %}
+    <div>
+        <h2 style="font-size:14px; font-weight:800; color:#10b981; letter-spacing:2px; text-transform:uppercase; margin-bottom:10px; padding-bottom:5px; border-bottom:1px solid #e2e8f0;">Languages</h2>
+        <p style="color:#64748b; font-size:14px;">{{ resume.languages }}</p>
+    </div>
+    {% endif %}
+
+</div>
+
+<footer class="no-print">© 2026 <span>FreshHire</span> — Built for Freshers 💚</footer>
+
+<script>
+function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+</script>
+</body>
+</html>
