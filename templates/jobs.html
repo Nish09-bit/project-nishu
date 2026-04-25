@@ -40,11 +40,53 @@
 
 <div style="background: linear-gradient(135deg, #0f172a, #1e293b); padding:60px 20px; text-align:center; color:white;">
     <h1 style="font-size:36px; font-weight:800; margin-bottom:10px;">Browse All Jobs 💼</h1>
-    <p style="font-size:16px; color:#94a3b8;">Find the perfect opportunity for your first step</p>
+    <p style="font-size:16px; color:#94a3b8; margin-bottom:30px;">Find the perfect opportunity for your first step</p>
+
+    <form method="GET" action="/jobs" style="max-width:700px; margin:0 auto;">
+        <!-- Row 1: Job title + Location + Search button -->
+        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-bottom:10px;">
+            <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                placeholder="🔍 Job title or company..."
+                style="flex:1; min-width:200px; padding:12px 18px; border-radius:10px; border:none; font-size:15px; outline:none; color:#0f172a;"
+            >
+            <input
+                type="text"
+                name="location"
+                value="{{ location }}"
+                placeholder="📍 Location"
+                style="width:170px; padding:12px 18px; border-radius:10px; border:none; font-size:15px; outline:none; color:#0f172a;"
+            >
+        </div>
+        <!-- Row 2: Skills + Search + Clear -->
+        <div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+            <input
+                type="text"
+                name="skill"
+                value="{{ skill }}"
+                placeholder="🛠️ Filter by skill (e.g. Python, React, Java...)"
+                style="flex:1; min-width:220px; padding:12px 18px; border-radius:10px; border:none; font-size:15px; outline:none; color:#0f172a;"
+            >
+            <button type="submit" style="padding:12px 24px; background:#10b981; color:white; border:none; border-radius:10px; font-size:15px; font-weight:700; cursor:pointer;">Search</button>
+            {% if query or location or skill %}
+            <a href="/jobs" style="padding:12px 18px; background:#475569; color:white; border-radius:10px; font-size:14px; font-weight:600; text-decoration:none; line-height:1.8;">✕ Clear</a>
+            {% endif %}
+        </div>
+    </form>
 </div>
 
 <div class="container">
-    <div class="cards-grid" style="margin-top:30px;">
+    {% if query or location or skill %}
+    <div style="margin-top:20px; margin-bottom:4px; color:#64748b; font-size:14px;">
+        Showing <strong>{{ jobs|length }}</strong> result{{ 's' if jobs|length != 1 else '' }}
+        {% if query %} for "<strong>{{ query }}</strong>"{% endif %}
+        {% if skill %} with skill "<strong>{{ skill }}</strong>"{% endif %}
+        {% if location %} in "<strong>{{ location }}</strong>"{% endif %}
+    </div>
+    {% endif %}
+    <div class="cards-grid" style="margin-top:{% if query or location or skill %}10px{% else %}30px{% endif %};">
         {% for job in jobs %}
         <div class="card">
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">

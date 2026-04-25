@@ -115,10 +115,29 @@ def logout():
 
 @app.route("/jobs")
 def jobs():
+    query = request.args.get("q", "").strip()
+    location = request.args.get("location", "").strip()
+    skill = request.args.get("skill", "").strip()
     conn = get_db()
-    jobs = conn.execute("SELECT * FROM jobs ORDER BY id DESC").fetchall()
+    if query or location or skill:
+        sql = "SELECT * FROM jobs WHERE 1=1"
+        params = []
+        if query:
+            sql += " AND (job_title LIKE ? OR company LIKE ? OR description LIKE ?)"
+            like = f"%{query}%"
+            params.extend([like, like, like])
+        if skill:
+            sql += " AND required_skills LIKE ?"
+            params.append(f"%{skill}%")
+        if location:
+            sql += " AND location LIKE ?"
+            params.append(f"%{location}%")
+        sql += " ORDER BY id DESC"
+        jobs = conn.execute(sql, params).fetchall()
+    else:
+        jobs = conn.execute("SELECT * FROM jobs ORDER BY id DESC").fetchall()
     conn.close()
-    return render_template("jobs.html", jobs=jobs)
+    return render_template("jobs.html", jobs=jobs, query=query, location=location, skill=skill)
 
 @app.route("/job/<int:job_id>")
 def job_detail(job_id):
