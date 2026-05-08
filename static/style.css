@@ -547,6 +547,7 @@ footer span { color: #10b981; font-weight: 600; }
 }
 
 .hamburger span {
+    display: block;
     width: 25px;
     height: 3px;
     background: white;
