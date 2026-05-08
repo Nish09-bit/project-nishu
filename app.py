@@ -27,6 +27,7 @@ def inject_globals():
             pass
     return {"notif_count": notif_count}
 
+# ================= HOME ================= #
 @app.route("/")
 def home():
     conn = get_db()
@@ -53,6 +54,7 @@ def home():
     conn.close()
     return render_template("index.html", jobs=jobs, reviews=reviews)
 
+# ================= SIGNUP ================= #
 @app.route("/signup", methods=["GET", "POST"])
 def signup():
     if request.method == "POST":
@@ -81,16 +83,10 @@ def signup():
 
         hashed = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
         conn = get_db()
-        # Add phone column if it doesn't exist yet
-        try:
-            conn.execute("ALTER TABLE users ADD COLUMN phone TEXT")
-            conn.commit()
-        except:
-            pass
         try:
             conn.execute(
-                "INSERT INTO users (first_name, last_name, email, phone, username, password, role) VALUES (?,?,?,?,?,?,?)",
-                (first_name, last_name, email or None, phone or None, username, hashed, role)
+                "INSERT INTO users (first_name, last_name, email, username, password, role, phone) VALUES (?,?,?,?,?,?,?)",
+                (first_name, last_name, email, username, hashed, role, phone)
             )
             conn.commit()
             if email:
@@ -108,6 +104,7 @@ def signup():
             conn.close()
     return render_template("signup.html")
 
+# ================= LOGIN ================= #
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -115,12 +112,6 @@ def login():
         identifier   = request.form.get("identifier", "").strip()
         password     = request.form.get("password", "")
         conn = get_db()
-        # Add phone column if it doesn't exist yet
-        try:
-            conn.execute("ALTER TABLE users ADD COLUMN phone TEXT")
-            conn.commit()
-        except:
-            pass
         if login_method == "phone":
             user = conn.execute("SELECT * FROM users WHERE phone=?", (identifier,)).fetchone()
         else:
@@ -136,24 +127,27 @@ def login():
             flash("Wrong credentials or account not found!", "error")
     return render_template("login.html")
 
+# ================= LOGOUT ================= #
 @app.route("/logout")
 def logout():
     session.clear()
     flash("Logged out successfully!", "success")
     return redirect(url_for("home"))
 
+# ================= JOBS ================= #
 @app.route("/jobs")
 def jobs():
-    q        = request.args.get("q", "").strip()
+    keyword  = request.args.get("keyword", "").strip()
     location = request.args.get("location", "").strip()
     skill    = request.args.get("skill", "").strip()
+    salary   = request.args.get("salary", "").strip()
     conn     = get_db()
 
     sql    = "SELECT * FROM jobs WHERE 1=1"
     params = []
-    if q:
+    if keyword:
         sql += " AND (job_title LIKE ? OR company LIKE ? OR description LIKE ?)"
-        like = f"%{q}%"
+        like = f"%{keyword}%"
         params.extend([like, like, like])
     if skill:
         sql += " AND required_skills LIKE ?"
@@ -161,10 +155,27 @@ def jobs():
     if location:
         sql += " AND location LIKE ?"
         params.append(f"%{location}%")
+    if salary:
+        sql += " AND salary LIKE ?"
+        params.append(f"%{salary}%")
     sql += " ORDER BY id DESC"
     jobs = conn.execute(sql, params).fetchall()
+
+    # Dropdown options
+    all_locations  = conn.execute("SELECT DISTINCT location FROM jobs WHERE location IS NOT NULL AND location != ''").fetchall()
+    all_salaries   = conn.execute("SELECT DISTINCT salary FROM jobs WHERE salary IS NOT NULL AND salary != ''").fetchall()
+    all_titles     = conn.execute("SELECT DISTINCT job_title FROM jobs WHERE job_title IS NOT NULL").fetchall()
+    all_skills_raw = conn.execute("SELECT required_skills FROM jobs WHERE required_skills IS NOT NULL AND required_skills != ''").fetchall()
+    all_skills = sorted(set(s.strip() for row in all_skills_raw for s in row[0].split(',')))
+
     conn.close()
-    return render_template("jobs.html", jobs=jobs, query=q, location=location, skill=skill)
+    return render_template("jobs.html", jobs=jobs,
+                           keyword=keyword, location=location,
+                           skill=skill, salary=salary,
+                           all_locations=all_locations,
+                           all_skills=all_skills,
+                           all_salaries=all_salaries,
+                           all_titles=all_titles)
 
 @app.route("/job/<int:job_id>")
 def job_detail(job_id):
@@ -215,6 +226,7 @@ def delete_job(job_id):
     flash("Job deleted successfully!", "success")
     return redirect(url_for("dashboard"))
 
+# ================= APPLY ================= #
 @app.route("/apply/<int:job_id>", methods=["GET", "POST"])
 def apply_job(job_id):
     if "user_id" not in session:
@@ -267,6 +279,7 @@ def my_applications():
     conn.close()
     return render_template("my_applications.html", applications=applications)
 
+# ================= PROFILE ================= #
 @app.route("/profile", methods=["GET", "POST"])
 def profile():
     if "user_id" not in session:
@@ -359,6 +372,7 @@ def edit_profile():
     conn.close()
     return render_template("edit_profile.html", profile=existing)
 
+# ================= UPLOADS ================= #
 @app.route("/upload-resume", methods=["POST"])
 def upload_resume():
     if "user_id" not in session:
@@ -397,6 +411,7 @@ def upload_photo():
             flash("Only JPG/PNG allowed!", "error")
     return redirect(url_for("dashboard"))
 
+# ================= BOOKMARKS ================= #
 @app.route("/bookmark/<int:job_id>")
 def bookmark(job_id):
     if "user_id" not in session:
@@ -433,6 +448,7 @@ def my_bookmarks():
     conn.close()
     return render_template("bookmarks.html", jobs=bookmarks)
 
+# ================= NOTIFICATIONS ================= #
 @app.route("/notifications")
 def notifications():
     if "user_id" not in session:
@@ -448,6 +464,7 @@ def notifications():
     conn.close()
     return render_template("notifications.html", notifs=notifs)
 
+# ================= CHAT ================= #
 @app.route("/chat/<int:receiver_id>", methods=["GET", "POST"])
 def chat(receiver_id):
     if "user_id" not in session:
@@ -480,6 +497,7 @@ def chat(receiver_id):
     conn.close()
     return render_template("chat.html", messages=messages, receiver=receiver, receiver_id=receiver_id)
 
+# ================= DASHBOARD ================= #
 @app.route("/dashboard")
 def dashboard():
     if "user_id" not in session:
@@ -504,6 +522,7 @@ def dashboard():
                            total_users=total_users, my_jobs=my_jobs,
                            my_profile=my_profile, is_admin=is_admin)
 
+# ================= ADMIN ================= #
 @app.route("/admin")
 def admin():
     if "user_id" not in session:
@@ -564,6 +583,7 @@ def update_status(app_id, status):
     flash("Status updated!", "success")
     return redirect(url_for("admin"))
 
+# ================= REVIEWS ================= #
 @app.route("/reviews", methods=["GET", "POST"])
 def reviews():
     if request.method == "POST":
@@ -581,6 +601,7 @@ def reviews():
         flash("Review submitted! ✅", "success")
     return redirect(url_for("home"))
 
+# ================= RECOMMENDATIONS ================= #
 @app.route("/recommendations")
 def recommendations():
     if "user_id" not in session:
@@ -608,18 +629,7 @@ def recommendations():
     conn.close()
     return render_template("recommendations.html", jobs=recommended, skill=my_profile["primary_skill"])
 
-@app.route("/about")
-def about():
-    return render_template("about.html")
-
-@app.route("/contact", methods=["GET", "POST"])
-def contact():
-    if request.method == "POST":
-        flash("Message sent successfully! ✅", "success")
-        return redirect(url_for("contact"))
-    return render_template("contact.html")
-
-# ================= COMPANY PROFILE ================= #
+# ================= COMPANY ================= #
 @app.route("/company/create", methods=["GET", "POST"])
 def create_company():
     if "user_id" not in session:
@@ -670,7 +680,7 @@ def resume_builder():
         return redirect(url_for("login"))
     conn = get_db()
     existing = conn.execute("SELECT * FROM resume_builder WHERE user_id=?", (session["user_id"],)).fetchone()
-    profile = conn.execute("SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)).fetchone()
+    profile  = conn.execute("SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)).fetchone()
     if request.method == "POST":
         if existing:
             conn.execute("""UPDATE resume_builder SET objective=?, experience=?, education=?,
@@ -699,13 +709,67 @@ def view_resume():
         flash("Please login first!", "error")
         return redirect(url_for("login"))
     conn = get_db()
-    resume = conn.execute("SELECT * FROM resume_builder WHERE user_id=?", (session["user_id"],)).fetchone()
+    resume  = conn.execute("SELECT * FROM resume_builder WHERE user_id=?", (session["user_id"],)).fetchone()
     profile = conn.execute("SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)).fetchone()
     conn.close()
     if not resume:
         flash("Please build your resume first!", "error")
         return redirect(url_for("resume_builder"))
     return render_template("view_resume.html", resume=resume, profile=profile)
+
+# ================= SETTINGS ================= #
+@app.route("/settings", methods=["GET", "POST"])
+def settings():
+    if "user_id" not in session:
+        flash("Please login first!", "error")
+        return redirect(url_for("login"))
+    conn = get_db()
+    user = conn.execute("SELECT * FROM users WHERE id=?", (session["user_id"],)).fetchone()
+    if request.method == "POST":
+        action = request.form.get("action")
+        if action == "change_password":
+            old_pw     = request.form.get("old_password", "")
+            new_pw     = request.form.get("new_password", "")
+            confirm_pw = request.form.get("confirm_password", "")
+            if not bcrypt.checkpw(old_pw.encode("utf-8"), user["password"].encode("utf-8")):
+                flash("Current password is wrong!", "error")
+            elif new_pw != confirm_pw:
+                flash("New passwords do not match!", "error")
+            elif len(new_pw) < 6:
+                flash("Password must be at least 6 characters!", "error")
+            else:
+                hashed = bcrypt.hashpw(new_pw.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+                conn.execute("UPDATE users SET password=? WHERE id=?", (hashed, session["user_id"]))
+                conn.commit()
+                flash("Password changed successfully! ✅", "success")
+        elif action == "delete_account":
+            confirm = request.form.get("confirm_delete", "")
+            if confirm == "DELETE":
+                conn.execute("DELETE FROM users WHERE id=?", (session["user_id"],))
+                conn.execute("DELETE FROM profiles WHERE user_id=?", (session["user_id"],))
+                conn.execute("DELETE FROM applications WHERE user_id=?", (session["user_id"],))
+                conn.execute("DELETE FROM bookmarks WHERE user_id=?", (session["user_id"],))
+                conn.execute("DELETE FROM notifications WHERE user_id=?", (session["user_id"],))
+                conn.commit()
+                session.clear()
+                flash("Account deleted successfully!", "success")
+                return redirect(url_for("home"))
+            else:
+                flash("Type DELETE to confirm!", "error")
+    conn.close()
+    return render_template("settings.html", user=user)
+
+# ================= OTHER ================= #
+@app.route("/about")
+def about():
+    return render_template("about.html")
+
+@app.route("/contact", methods=["GET", "POST"])
+def contact():
+    if request.method == "POST":
+        flash("Message sent successfully! ✅", "success")
+        return redirect(url_for("contact"))
+    return render_template("contact.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Settings - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="/static/favicon.png" type="image/png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* ── Settings-specific dark mode overrides ── */
+        .settings-card-heading {
+            color: #e2e8f0;
+        }
+        body.light-mode .settings-card-heading {
+            color: #1a1a2e !important;
+        }
+
+        .settings-value-text {
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+        body.light-mode .settings-value-text {
+            color: #1a1a2e !important;
+        }
+
+        .settings-label-text {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+        .settings-link-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background: #1e293b;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+            transition: all 0.2s;
+        }
+        .settings-link-row:hover {
+            border-color: #10b981;
+        }
+        body.light-mode .settings-link-row {
+            background: #f8fafb !important;
+            color: #1a1a2e !important;
+            border-color: #e2e8f0 !important;
+        }
+        body.light-mode .settings-link-row:hover {
+            border-color: #10b981 !important;
+        }
+
+        .settings-link-sub {
+            color: #94a3b8;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .settings-input {
+            width: 100%;
+            padding: 13px 16px;
+            margin-bottom: 12px;
+            border: 2px solid #334155;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+            font-family: 'Poppins', sans-serif;
+            transition: border 0.2s;
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+        .settings-input:focus {
+            border-color: #10b981;
+        }
+        body.light-mode .settings-input {
+            background: #ffffff !important;
+            color: #1a1a2e !important;
+            border-color: #e2e8f0 !important;
+        }
+        body.light-mode .settings-input:focus {
+            border-color: #10b981 !important;
+        }
+
+        /* Dark mode toggle row inside settings */
+        .theme-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px;
+            background: #1e293b;
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+        body.light-mode .theme-row {
+            background: #f8fafb !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background: #334155;
+            border-radius: 26px;
+            transition: 0.2s;
+        }
+        .toggle-slider:before {
+            content: '';
+            position: absolute;
+            height: 18px;
+            width: 18px;
+            left: 4px;
+            bottom: 4px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+        input:checked + .toggle-slider {
+            background: #10b981;
+        }
+        input:checked + .toggle-slider:before {
+            transform: translateX(22px);
+        }
+
+        /* Logout button styling */
+        .btn-logout {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px;
+            background: #1e293b;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #f87171;
+            border: 1px solid #334155;
+            transition: all 0.2s;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+        }
+        .btn-logout:hover {
+            background: #450a0a;
+            border-color: #ef4444;
+        }
+        body.light-mode .btn-logout {
+            background: #fff1f1 !important;
+            color: #dc2626 !important;
+            border-color: #fca5a5 !important;
+        }
+        body.light-mode .btn-logout:hover {
+            background: #fee2e2 !important;
+            border-color: #ef4444 !important;
+        }
+
+        .settings-hero {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            padding: 60px 20px;
+            text-align: center;
+            color: white;
+        }
+        body.light-mode .settings-hero {
+            background: linear-gradient(135deg, #1e293b, #334155) !important;
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <a href="/" style="display:flex; align-items:center; gap:8px; text-decoration:none;">
+        <img src="/static/logo.png" alt="logo" style="height:32px;">
+        <span class="brand-name" style="color:white; font-weight:800; font-size:20px;">FreshHire</span>
+    </a>
+    <div class="nav-links" id="nav-links">
+        {% if session.get('user_id') %}
+            {% if session.get('role') == 'hirer' %}
+            <a href="/post-job">Post Job</a>
+            {% endif %}
+            <a href="/jobs">Jobs</a>
+            <a href="/profiles">Freshers</a>
+            <a href="/notifications" style="position:relative;">🔔{% if notif_count > 0 %}<span style="position:absolute;top:-5px;right:-5px;background:#dc2626;color:white;border-radius:50%;width:16px;height:16px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;">{{ notif_count }}</span>{% endif %}</a>
+            <a href="/dashboard">Dashboard</a>
+            <div class="nav-dropdown">
+                <button class="nav-dropdown-btn">👤 {{ session.get('name') }} ▾</button>
+                <div class="nav-dropdown-menu">
+                    <a href="/my-profile">👤 My Profile</a>
+                    <a href="/bookmarks">🔖 Bookmarks</a>
+                    <a href="/resume-builder">📄 Resume Builder</a>
+                    <a href="/my-applications">📝 My Applications</a>
+                    <a href="/settings">⚙️ Settings</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" onclick="toggleTheme();return false;" id="themeBtn">☀️ Light Mode</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="/logout" style="color:#ef4444 !important;">🚪 Logout</a>
+                </div>
+            </div>
+        {% else %}
+            <a href="/jobs">Jobs</a>
+            <a href="/profiles">Freshers</a>
+            <a href="/about">About</a>
+            <a href="/contact">Contact</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
+            <a href="/login">Login</a>
+            <a href="/signup" style="background:linear-gradient(135deg,#10b981,#059669);color:white !important;border-radius:8px;padding:7px 18px;font-weight:700;">Sign Up</a>
+        {% endif %}
+    </div>
+    <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+        <span></span><span></span><span></span>
+    </div>
+</nav>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div class="container" style="margin-top:20px; margin-bottom:0;">
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}
+
+<div class="settings-hero">
+    <h1 style="font-size:32px; font-weight:800; margin-bottom:10px;">⚙️ Settings</h1>
+    <p style="color:#94a3b8;">Manage your account preferences</p>
+</div>
+
+<div style="max-width:650px; margin:40px auto; padding:0 20px 60px;">
+
+    <!-- Account Info -->
+    <div class="card" style="margin-bottom:25px;">
+        <h2 class="settings-card-heading" style="font-size:18px; font-weight:700; margin-bottom:20px; border-left:4px solid #10b981; padding-left:12px;">👤 Account Info</h2>
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:200px;">
+                <p class="settings-label-text">NAME</p>
+                <p class="settings-value-text">{{ user.first_name }} {{ user.last_name }}</p>
+            </div>
+            <div style="flex:1; min-width:200px;">
+                <p class="settings-label-text">EMAIL</p>
+                <p class="settings-value-text">{{ user.email }}</p>
+            </div>
+            <div style="flex:1; min-width:200px;">
+                <p class="settings-label-text">USERNAME</p>
+                <p class="settings-value-text">@{{ user.username }}</p>
+            </div>
+            <div style="flex:1; min-width:200px;">
+                <p class="settings-label-text">ROLE</p>
+                <span style="background:{% if user.role == 'hirer' %}#1e3a5f{% else %}#064e3b{% endif %}; color:{% if user.role == 'hirer' %}#93c5fd{% else %}#6ee7b7{% endif %}; padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700;">
+                    {% if user.role == 'hirer' %}🏢 Hirer{% else %}🎓 Fresher{% endif %}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Appearance -->
+    <div class="card" style="margin-bottom:25px;">
+        <h2 class="settings-card-heading" style="font-size:18px; font-weight:700; margin-bottom:20px; border-left:4px solid #10b981; padding-left:12px;">🎨 Appearance</h2>
+        <div class="theme-row">
+            <div>
+                <p class="settings-value-text" style="font-size:14px; margin:0;">Light Mode</p>
+                <p class="settings-label-text" style="margin:0; margin-top:2px;">Switch between dark and light theme</p>
+            </div>
+            <label class="toggle-switch" aria-label="Toggle light/dark mode">
+                <input type="checkbox" id="themeCheckbox" onchange="toggleThemeFromCheckbox(this)">
+                <span class="toggle-slider"></span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="card" style="margin-bottom:25px;">
+        <h2 class="settings-card-heading" style="font-size:18px; font-weight:700; margin-bottom:20px; border-left:4px solid #10b981; padding-left:12px;">🔒 Change Password</h2>
+        <form method="POST" action="/settings">
+            <input type="hidden" name="action" value="change_password">
+            <input type="password" name="old_password" placeholder="Current Password" required class="settings-input">
+            <input type="password" name="new_password" placeholder="New Password (min 6 chars)" required class="settings-input">
+            <input type="password" name="confirm_password" placeholder="Confirm New Password" required class="settings-input" style="margin-bottom:15px;">
+            <button type="submit" class="btn" style="width:100%; padding:13px;">Update Password 🔒</button>
+        </form>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="card" style="margin-bottom:25px;">
+        <h2 class="settings-card-heading" style="font-size:18px; font-weight:700; margin-bottom:20px; border-left:4px solid #10b981; padding-left:12px;">🔗 Quick Links</h2>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <a href="/edit-profile" class="settings-link-row">
+                <span style="font-size:20px;">✏️</span>
+                <div>
+                    <p style="margin:0; font-weight:600; font-size:14px;">Edit Profile</p>
+                    <p class="settings-link-sub">Update your personal info</p>
+                </div>
+                <span style="margin-left:auto; color:#10b981;">→</span>
+            </a>
+            <a href="/resume-builder" class="settings-link-row">
+                <span style="font-size:20px;">📄</span>
+                <div>
+                    <p style="margin:0; font-weight:600; font-size:14px;">Resume Builder</p>
+                    <p class="settings-link-sub">Create or update your resume</p>
+                </div>
+                <span style="margin-left:auto; color:#10b981;">→</span>
+            </a>
+            <a href="/my-applications" class="settings-link-row">
+                <span style="font-size:20px;">📝</span>
+                <div>
+                    <p style="margin:0; font-weight:600; font-size:14px;">My Applications</p>
+                    <p class="settings-link-sub">Track your job applications</p>
+                </div>
+                <span style="margin-left:auto; color:#10b981;">→</span>
+            </a>
+            <a href="/bookmarks" class="settings-link-row">
+                <span style="font-size:20px;">🔖</span>
+                <div>
+                    <p style="margin:0; font-weight:600; font-size:14px;">Bookmarks</p>
+                    <p class="settings-link-sub">Your saved jobs</p>
+                </div>
+                <span style="margin-left:auto; color:#10b981;">→</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Account Actions (Logout + Delete) -->
+    <div class="card" style="margin-bottom:25px;">
+        <h2 class="settings-card-heading" style="font-size:18px; font-weight:700; margin-bottom:20px; border-left:4px solid #f59e0b; padding-left:12px;">👤 Account Actions</h2>
+        <div style="display:flex; flex-direction:column; gap:10px;">
+            <a href="/logout" class="btn-logout">
+                <span style="font-size:20px;">🚪</span>
+                <div>
+                    <p style="margin:0; font-size:14px;">Logout</p>
+                    <p style="margin:0; font-size:12px; font-weight:400; opacity:0.75;">Sign out of your account</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <!-- Danger Zone -->
+    <div class="card" style="border:1px solid #7f1d1d;">
+        <h2 style="font-size:18px; font-weight:700; margin-bottom:8px; color:#f87171; border-left:4px solid #ef4444; padding-left:12px;">⚠️ Danger Zone</h2>
+        <p style="color:#94a3b8; font-size:13px; margin-bottom:20px;">Once deleted, your account cannot be recovered!</p>
+
+        <button onclick="document.getElementById('deleteForm').style.display='block'; this.style.display='none';"
+            class="btn" style="background:#7f1d1d; border:1px solid #ef4444; width:100%; color:#fca5a5;">Delete My Account</button>
+
+        <form method="POST" action="/settings" id="deleteForm" style="display:none; margin-top:15px;">
+            <input type="hidden" name="action" value="delete_account">
+            <p style="color:#f87171; font-size:13px; font-weight:600; margin-bottom:10px;">Type <b>DELETE</b> to confirm:</p>
+            <input type="text" name="confirm_delete" placeholder="Type DELETE here..." required
+                class="settings-input" style="border-color:#7f1d1d; margin-bottom:12px;">
+            <div style="display:flex; gap:10px;">
+                <button type="submit" class="btn" style="background:#7f1d1d; border:1px solid #ef4444; flex:1; color:#fca5a5;">Confirm Delete</button>
+                <button type="button"
+                    onclick="document.getElementById('deleteForm').style.display='none'; document.querySelector('[onclick*=deleteForm]').style.display='block';"
+                    class="btn" style="background:#1e293b; flex:1;">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+<footer>© 2026 <span>FreshHire</span> — Built for Freshers 💚</footer>
+
+<script>
+// ── Theme init — runs before paint to avoid flash ──
+(function() {
+    if (localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+    }
+})();
+
+// ── Sync checkbox state after DOM is ready ──
+window.addEventListener('DOMContentLoaded', function() {
+    var cb = document.getElementById('themeCheckbox');
+    var btn = document.getElementById('themeBtn');
+    var isLight = document.body.classList.contains('light-mode');
+    if (cb) cb.checked = isLight;
+    if (btn) btn.textContent = isLight ? '☀️ Light' : '🌙 Dark';
+});
+
+// ── Toggle from navbar button ──
+function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    var isLight = document.body.classList.contains('light-mode');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    var btn = document.getElementById('themeBtn');
+    var cb = document.getElementById('themeCheckbox');
+    if (btn) btn.textContent = isLight ? '☀️ Light' : '🌙 Dark';
+    if (cb) cb.checked = isLight;
+}
+
+// ── Toggle from settings checkbox ──
+function toggleThemeFromCheckbox(checkbox) {
+    if (checkbox.checked) {
+        document.body.classList.add('light-mode');
+        localStorage.setItem('theme', 'light');
+    } else {
+        document.body.classList.remove('light-mode');
+        localStorage.setItem('theme', 'dark');
+    }
+    var btn = document.getElementById('themeBtn');
+    if (btn) btn.textContent = checkbox.checked ? '☀️ Light' : '🌙 Dark';
+}
+
+function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+</script>
+<script>
+(function(){
+    var t=localStorage.getItem('fh_theme')||'dark';
+    document.documentElement.setAttribute('data-theme',t);
+})();
+function toggleTheme(){
+    var cur=localStorage.getItem('fh_theme')||'dark';
+    var next=cur==='dark'?'light':'dark';
+    localStorage.setItem('fh_theme',next);
+    document.documentElement.setAttribute('data-theme',next);
+    document.querySelectorAll('#themeBtn').forEach(function(b){
+        b.textContent=next==='light'?'🌙 Dark Mode':'☀️ Light Mode';
+    });
+}
+document.addEventListener('DOMContentLoaded',function(){
+    var t=localStorage.getItem('fh_theme')||'dark';
+    document.querySelectorAll('#themeBtn').forEach(function(b){
+        b.textContent=t==='light'?'🌙 Dark Mode':'☀️ Light Mode';
+    });
+});
+</script>
+<script>
+function toggleMenu(){
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+</script>
+</body>
+</html>

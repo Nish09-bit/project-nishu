@@ -66,33 +66,38 @@
 <body>
 
 <nav>
-    <h2 style="display:flex; align-items:center; gap:6px;">
-        <img src="/static/logo.png" alt="logo" style="height:28px;">
-        <span style="font-size:22px; font-weight:bold; color:white;">FreshHire</span>
-    </h2>
+    <a href="/" style="display:flex; align-items:center; gap:8px; text-decoration:none;"><img src="/static/logo.png" alt="logo" style="height:32px;"><span style="color:white; font-weight:800; font-size:20px;">FreshHire</span></a>
     <div class="nav-links" id="nav-links">
-        <a href="/">Home</a>
-        <a href="/jobs">Jobs</a>
-        <a href="/profiles">Freshers</a>
-        {% if session.get('role') == 'hirer' %}
-        <a href="/post-job">Post Job</a>
-        {% endif %}
-        <a href="/about">About</a>
-        <a href="/contact">Contact</a>
         {% if session.get('user_id') %}
-            <a href="/my-profile">My Profile</a>
-            <a href="/bookmarks">🔖 Bookmarks</a>
-            <a href="/notifications">🔔
-                {% if notif_count > 0 %}
-                <span style="background:#dc2626; color:white; border-radius:50%; padding:2px 6px; font-size:11px;">{{ notif_count }}</span>
-                {% endif %}
-            </a>
+            {% if session.get('role') == 'hirer' %}
+            <a href="/post-job">Post Job</a>
+            {% endif %}
+            <a href="/jobs">Jobs</a>
+            <a href="/profiles">Freshers</a>
+            <a href="/notifications" style="position:relative;">🔔{% if notif_count > 0 %}<span style="position:absolute;top:-5px;right:-5px;background:#dc2626;color:white;border-radius:50%;width:16px;height:16px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;">{{ notif_count }}</span>{% endif %}</a>
             <a href="/dashboard">Dashboard</a>
-            <span>Hi, {{ session.get('name') }}!</span>
-            <a href="/logout">Logout</a>
+            <div class="nav-dropdown">
+                <button class="nav-dropdown-btn">👤 {{ session.get('name') }} ▾</button>
+                <div class="nav-dropdown-menu">
+                    <a href="/my-profile">👤 My Profile</a>
+                    <a href="/bookmarks">🔖 Bookmarks</a>
+                    <a href="/resume-builder">📄 Resume Builder</a>
+                    <a href="/my-applications">📝 My Applications</a>
+                    <a href="/settings">⚙️ Settings</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" onclick="toggleTheme();return false;" id="themeBtn">☀️ Light Mode</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="/logout" style="color:#ef4444 !important;">🚪 Logout</a>
+                </div>
+            </div>
         {% else %}
+            <a href="/jobs">Jobs</a>
+            <a href="/profiles">Freshers</a>
+            <a href="/about">About</a>
+            <a href="/contact">Contact</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
             <a href="/login">Login</a>
-            <a href="/signup">Sign Up</a>
+            <a href="/signup" style="background:linear-gradient(135deg,#10b981,#059669);color:white !important;border-radius:8px;padding:7px 18px;font-weight:700;">Sign Up</a>
         {% endif %}
     </div>
     <div class="hamburger" onclick="toggleMenu()" id="hamburger">
@@ -157,6 +162,33 @@ var chatbox = document.getElementById('chatbox');
 chatbox.scrollTop = chatbox.scrollHeight;
 
 function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+</script>
+<script>
+(function(){
+    var t=localStorage.getItem('fh_theme')||'dark';
+    document.documentElement.setAttribute('data-theme',t);
+})();
+function toggleTheme(){
+    var cur=localStorage.getItem('fh_theme')||'dark';
+    var next=cur==='dark'?'light':'dark';
+    localStorage.setItem('fh_theme',next);
+    document.documentElement.setAttribute('data-theme',next);
+    document.querySelectorAll('#themeBtn').forEach(function(b){
+        b.textContent=next==='light'?'🌙 Dark Mode':'☀️ Light Mode';
+    });
+}
+document.addEventListener('DOMContentLoaded',function(){
+    var t=localStorage.getItem('fh_theme')||'dark';
+    document.querySelectorAll('#themeBtn').forEach(function(b){
+        b.textContent=t==='light'?'🌙 Dark Mode':'☀️ Light Mode';
+    });
+});
+</script>
+<script>
+function toggleMenu(){
     document.getElementById('nav-links').classList.toggle('open');
     document.getElementById('hamburger').classList.toggle('active');
 }

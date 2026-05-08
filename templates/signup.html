@@ -5,15 +5,16 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.png" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 </head>
 <body style="background: linear-gradient(135deg, #0f172a, #1e293b); min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 0;">
 
 <div class="form-container" style="width:480px;">
 
     <div style="text-align:center; margin-bottom:25px;">
-        <span style="font-size:40px;">👋</span>
-        <h2 style="margin-top:10px;">Create Account</h2>
+        <a href="/" style="text-decoration:none;">
+            <img src="/static/logo.png" alt="logo" style="height:40px; margin-bottom:10px;">
+        </a>
+        <h2 style="margin-top:5px;">Create Account</h2>
         <p style="color:#94a3b8; font-size:14px;">Join FreshHire — it's free!</p>
     </div>
 
@@ -28,50 +29,89 @@
     <!-- Role Selection -->
     <p style="font-weight:700; color:#10b981; margin-bottom:12px; text-align:center; font-size:15px;">I am joining as...</p>
 
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:25px;">
-
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
         <div onclick="selectRole('fresher')" id="fresher-card"
-             style="border:2px solid #10b981; border-radius:14px; padding:20px; text-align:center; cursor:pointer; background:rgba(16,185,129,0.1);">
+             style="border:2px solid #10b981; border-radius:14px; padding:20px; text-align:center; cursor:pointer; background:rgba(16,185,129,0.1); transition:all 0.2s;">
             <div style="font-size:35px; margin-bottom:8px;">🎓</div>
             <p style="font-weight:700; color:white; margin:0; font-size:15px;">Fresher</p>
             <p style="font-size:12px; color:#94a3b8; margin:5px 0 0;">Looking for a job</p>
         </div>
-
         <div onclick="selectRole('hirer')" id="hirer-card"
-             style="border:2px solid #334155; border-radius:14px; padding:20px; text-align:center; cursor:pointer; background:transparent;">
+             style="border:2px solid #334155; border-radius:14px; padding:20px; text-align:center; cursor:pointer; background:transparent; transition:all 0.2s;">
             <div style="font-size:35px; margin-bottom:8px;">🏢</div>
             <p style="font-weight:700; color:white; margin:0; font-size:15px;">Hirer</p>
             <p style="font-size:12px; color:#94a3b8; margin:5px 0 0;">Want to hire talent</p>
         </div>
+    </div>
 
+    <!-- Signup Method Toggle -->
+    <p style="font-weight:700; color:#10b981; margin-bottom:10px; font-size:14px;">Sign up with...</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;">
+        <div onclick="switchSignup('email')" id="email-signup-tab"
+             style="padding:10px; text-align:center; border-radius:10px; cursor:pointer; background:rgba(16,185,129,0.15); border:2px solid #10b981; color:#10b981; font-weight:700; font-size:13px; transition:all 0.2s;">
+            📧 Email
+        </div>
+        <div onclick="switchSignup('phone')" id="phone-signup-tab"
+             style="padding:10px; text-align:center; border-radius:10px; cursor:pointer; background:transparent; border:2px solid #334155; color:#94a3b8; font-weight:700; font-size:13px; transition:all 0.2s;">
+            📱 Phone
+        </div>
     </div>
 
     <form method="POST" action="/signup">
         <input type="hidden" name="role" id="role-input" value="fresher">
+        <input type="hidden" name="login_method" id="signup_method" value="email">
 
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            <input type="text" name="first_name" placeholder="First Name" required>
-            <input type="text" name="last_name" placeholder="Last Name">
+            <input type="text" name="first_name" placeholder="First Name" required
+                   style="padding:13px 16px; border:2px solid #334155; border-radius:10px; font-size:14px; outline:none; background:#1e293b; color:white; font-family:'Poppins',sans-serif; transition:border 0.2s;"
+                   onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#334155'">
+            <input type="text" name="last_name" placeholder="Last Name"
+                   style="padding:13px 16px; border:2px solid #334155; border-radius:10px; font-size:14px; outline:none; background:#1e293b; color:white; font-family:'Poppins',sans-serif; transition:border 0.2s;"
+                   onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#334155'">
         </div>
-        <input type="email" name="email" placeholder="📧 Email Address" required>
-        <input type="text" name="username" placeholder="👤 Username" required>
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-            <input type="password" name="password" placeholder="🔒 Password" required>
-            <input type="password" name="confirm_password" placeholder="🔒 Confirm" required>
+        <br>
+
+        <!-- Email field -->
+        <div id="email-field">
+            <input type="email" name="email" placeholder="📧 Email Address"
+                   style="width:100%; padding:13px 16px; margin-bottom:12px; border:2px solid #334155; border-radius:10px; font-size:14px; outline:none; background:#1e293b; color:white; font-family:'Poppins',sans-serif; box-sizing:border-box; transition:border 0.2s;"
+                   onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#334155'">
         </div>
 
-        <button type="submit" id="signup-btn" style="margin-top:5px;">
+        <!-- Phone field -->
+        <div id="phone-field" style="display:none;">
+            <input type="tel" name="phone" placeholder="📱 Phone Number (10 digits)"
+                   style="width:100%; padding:13px 16px; margin-bottom:12px; border:2px solid #334155; border-radius:10px; font-size:14px; outline:none; background:#1e293b; color:white; font-family:'Poppins',sans-serif; box-sizing:border-box; transition:border 0.2s;"
+                   onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#334155'">
+        </div>
+
+        <input type="text" name="username" placeholder="👤 Username" required
+               style="width:100%; padding:13px 16px; margin-bottom:12px; border:2px solid #334155; border-radius:10px; font-size:14px; outline:none; background:#1e293b; color:white; font-family:'Poppins',sans-serif; box-sizing:border-box; transition:border 0.2s;"
+               onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#334155'">
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:15px;">
+            <input type="password" name="password" placeholder="🔒 Password" required
+                   style="padding:13px 16px; border:2px solid #334155; border-radius:10px; font-size:14px; outline:none; background:#1e293b; color:white; font-family:'Poppins',sans-serif; transition:border 0.2s;"
+                   onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#334155'">
+            <input type="password" name="confirm_password" placeholder="🔒 Confirm" required
+                   style="padding:13px 16px; border:2px solid #334155; border-radius:10px; font-size:14px; outline:none; background:#1e293b; color:white; font-family:'Poppins',sans-serif; transition:border 0.2s;"
+                   onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#334155'">
+        </div>
+
+        <button type="submit" id="signup-btn"
+                style="width:100%; padding:14px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; transition:all 0.2s;"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16,185,129,0.4)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
             Join as Fresher 🎓
         </button>
     </form>
 
-    <p style="text-align:center; margin-top:20px; color:#64748b;">
-        Already have an account? <a href="/login">Login</a>
+    <p style="text-align:center; margin-top:20px; color:#64748b; font-size:14px;">
+        Already have an account? <a href="/login" style="color:#10b981; font-weight:600;">Login</a>
     </p>
-    <p style="text-align:center; margin-top:5px;">
+    <p style="text-align:center; margin-top:8px;">
         <a href="/" style="color:#475569; font-size:13px;">← Back to Home</a>
     </p>
-
 </div>
 
 <script>
@@ -80,7 +120,6 @@ function selectRole(role) {
     var hirerCard   = document.getElementById('hirer-card');
     var roleInput   = document.getElementById('role-input');
     var signupBtn   = document.getElementById('signup-btn');
-
     if (role === 'fresher') {
         fresherCard.style.border     = '2px solid #10b981';
         fresherCard.style.background = 'rgba(16,185,129,0.1)';
@@ -97,7 +136,99 @@ function selectRole(role) {
         signupBtn.innerHTML          = 'Join as Hirer 🏢';
     }
 }
+
+function switchSignup(method) {
+    var emailTab  = document.getElementById('email-signup-tab');
+    var phoneTab  = document.getElementById('phone-signup-tab');
+    var emailField = document.getElementById('email-field');
+    var phoneField = document.getElementById('phone-field');
+    var signupMethod = document.getElementById('signup_method');
+
+    if (method === 'email') {
+        emailTab.style.background  = 'rgba(16,185,129,0.15)';
+        emailTab.style.border      = '2px solid #10b981';
+        emailTab.style.color       = '#10b981';
+        phoneTab.style.background  = 'transparent';
+        phoneTab.style.border      = '2px solid #334155';
+        phoneTab.style.color       = '#94a3b8';
+        emailField.style.display   = 'block';
+        phoneField.style.display   = 'none';
+        signupMethod.value         = 'email';
+    } else {
+        phoneTab.style.background  = 'rgba(16,185,129,0.15)';
+        phoneTab.style.border      = '2px solid #10b981';
+        phoneTab.style.color       = '#10b981';
+        emailTab.style.background  = 'transparent';
+        emailTab.style.border      = '2px solid #334155';
+        emailTab.style.color       = '#94a3b8';
+        emailField.style.display   = 'none';
+        phoneField.style.display   = 'block';
+        signupMethod.value         = 'phone';
+    }
+}
 </script>
 
+
+
+
+<script>
+// Theme load on page start
+(function() {
+    if(localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+    }
+})();
+
+function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    var btn = document.getElementById('themeBtn');
+    if(document.body.classList.contains('light-mode')) {
+        localStorage.setItem('theme', 'light');
+        if(btn) btn.textContent = '☀️ Light';
+    } else {
+        localStorage.setItem('theme', 'dark');
+        if(btn) btn.textContent = '🌙 Dark';
+    }
+}
+
+// Set correct button text on load
+window.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('themeBtn');
+    if(btn) {
+        if(document.body.classList.contains('light-mode')) {
+            btn.textContent = '☀️ Light';
+        } else {
+            btn.textContent = '🌙 Dark';
+        }
+    }
+});
+</script>
+<script>
+(function(){
+    var t=localStorage.getItem('fh_theme')||'dark';
+    document.documentElement.setAttribute('data-theme',t);
+})();
+function toggleTheme(){
+    var cur=localStorage.getItem('fh_theme')||'dark';
+    var next=cur==='dark'?'light':'dark';
+    localStorage.setItem('fh_theme',next);
+    document.documentElement.setAttribute('data-theme',next);
+    document.querySelectorAll('#themeBtn').forEach(function(b){
+        b.textContent=next==='light'?'🌙 Dark Mode':'☀️ Light Mode';
+    });
+}
+document.addEventListener('DOMContentLoaded',function(){
+    var t=localStorage.getItem('fh_theme')||'dark';
+    document.querySelectorAll('#themeBtn').forEach(function(b){
+        b.textContent=t==='light'?'🌙 Dark Mode':'☀️ Light Mode';
+    });
+});
+</script>
+<script>
+function toggleMenu(){
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+</script>
 </body>
 </html>

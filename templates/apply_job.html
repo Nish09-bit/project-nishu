@@ -10,7 +10,7 @@
 <body style="background:#f4f9f4;">
 
 <nav>
-    <h2>🚀 FreshHire</h2>
+    <a href="/" style="display:flex; align-items:center; gap:8px; text-decoration:none;"><img src="/static/logo.png" alt="logo" style="height:32px;"><span style="color:white; font-weight:800; font-size:20px;">FreshHire</span></a>
     <div class="nav-links">
         <a href="/">Home</a>
         <a href="/jobs">Jobs</a>
@@ -24,6 +24,7 @@
             </a>
             <span>Hi, {{ session.get('name') }}!</span>
             <a href="/logout">Logout</a>
+            <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
         {% else %}
             <a href="/login">Login</a>
             <a href="/signup">Sign Up</a>
@@ -74,5 +75,32 @@
     © 2026 FreshHire — Built for Freshers 💚
 </footer>
 
+<script>
+(function(){
+    var t=localStorage.getItem('fh_theme')||'dark';
+    document.documentElement.setAttribute('data-theme',t);
+})();
+function toggleTheme(){
+    var cur=localStorage.getItem('fh_theme')||'dark';
+    var next=cur==='dark'?'light':'dark';
+    localStorage.setItem('fh_theme',next);
+    document.documentElement.setAttribute('data-theme',next);
+    document.querySelectorAll('#themeBtn').forEach(function(b){
+        b.textContent=next==='light'?'🌙 Dark Mode':'☀️ Light Mode';
+    });
+}
+document.addEventListener('DOMContentLoaded',function(){
+    var t=localStorage.getItem('fh_theme')||'dark';
+    document.querySelectorAll('#themeBtn').forEach(function(b){
+        b.textContent=t==='light'?'🌙 Dark Mode':'☀️ Light Mode';
+    });
+});
+</script>
+<script>
+function toggleMenu(){
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+</script>
 </body>
 </html>

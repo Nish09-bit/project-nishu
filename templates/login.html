@@ -5,15 +5,16 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.png" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 </head>
-<body style="background: linear-gradient(135deg, #16a34a, #15803d); min-height:100vh; display:flex; align-items:center; justify-content:center;">
+<body style="background: linear-gradient(135deg, #0f172a, #1e293b); min-height:100vh; display:flex; align-items:center; justify-content:center;">
 
-<div class="form-container" style="width:420px;">
+<div class="form-container" style="width:440px;">
     <div style="text-align:center; margin-bottom:25px;">
-        <span style="font-size:40px;">🚀</span>
-        <h2 style="margin-top:10px;">Welcome Back!</h2>
-        <p style="color:#888; font-size:14px;">Login to your FreshHire account</p>
+        <a href="/" style="text-decoration:none;">
+            <img src="/static/logo.png" alt="logo" style="height:40px; margin-bottom:10px;">
+        </a>
+        <h2 style="margin-top:5px;">Welcome Back!</h2>
+        <p style="color:#94a3b8; font-size:14px;">Login to your FreshHire account</p>
     </div>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -24,19 +25,139 @@
         {% endif %}
     {% endwith %}
 
+    <!-- Login Method Toggle -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px;">
+        <div onclick="switchMethod('email')" id="email-tab"
+             style="padding:10px; text-align:center; border-radius:10px; cursor:pointer; background:rgba(16,185,129,0.15); border:2px solid #10b981; color:#10b981; font-weight:700; font-size:14px; transition:all 0.2s;">
+            📧 Email
+        </div>
+        <div onclick="switchMethod('phone')" id="phone-tab"
+             style="padding:10px; text-align:center; border-radius:10px; cursor:pointer; background:transparent; border:2px solid #334155; color:#94a3b8; font-weight:700; font-size:14px; transition:all 0.2s;">
+            📱 Phone
+        </div>
+    </div>
+
     <form method="POST" action="/login">
-        <input type="email" name="email" placeholder="📧  Email Address" required>
-        <input type="password" name="password" placeholder="🔒  Password" required>
-        <button type="submit">Login →</button>
+        <input type="hidden" name="login_method" id="login_method" value="email">
+
+        <input type="text" name="identifier" id="identifier-input"
+               placeholder="📧 Enter your email address" required
+               style="width:100%; padding:13px 16px; margin-bottom:15px; border:2px solid #e2e8f0; border-radius:10px; font-size:14px; outline:none; font-family:'Poppins',sans-serif; background:#1e293b; color:white; transition:border 0.2s;"
+               onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#334155'">
+
+        <input type="password" name="password"
+               placeholder="🔒 Password" required
+               style="width:100%; padding:13px 16px; margin-bottom:15px; border:2px solid #334155; border-radius:10px; font-size:14px; outline:none; font-family:'Poppins',sans-serif; background:#1e293b; color:white; transition:border 0.2s;"
+               onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#334155'">
+
+        <button type="submit"
+                style="width:100%; padding:14px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; transition:all 0.2s;"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16,185,129,0.4)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+            Login →
+        </button>
     </form>
 
-    <p style="text-align:center; margin-top:20px; color:#555;">
-        Don't have an account? <a href="/signup">Sign Up Free</a>
+    <p style="text-align:center; margin-top:20px; color:#64748b; font-size:14px;">
+        Don't have an account? <a href="/signup" style="color:#10b981; font-weight:600;">Sign Up Free</a>
     </p>
-    <p style="text-align:center; margin-top:5px;">
-        <a href="/" style="color:#aaa; font-size:13px;">← Back to Home</a>
+    <p style="text-align:center; margin-top:8px;">
+        <a href="/" style="color:#475569; font-size:13px;">← Back to Home</a>
     </p>
 </div>
 
+<script>
+function switchMethod(method) {
+    var emailTab  = document.getElementById('email-tab');
+    var phoneTab  = document.getElementById('phone-tab');
+    var input     = document.getElementById('identifier-input');
+    var loginMethod = document.getElementById('login_method');
+
+    if (method === 'email') {
+        emailTab.style.background = 'rgba(16,185,129,0.15)';
+        emailTab.style.border     = '2px solid #10b981';
+        emailTab.style.color      = '#10b981';
+        phoneTab.style.background = 'transparent';
+        phoneTab.style.border     = '2px solid #334155';
+        phoneTab.style.color      = '#94a3b8';
+        input.placeholder         = '📧 Enter your email address';
+        input.type                = 'email';
+        loginMethod.value         = 'email';
+    } else {
+        phoneTab.style.background = 'rgba(16,185,129,0.15)';
+        phoneTab.style.border     = '2px solid #10b981';
+        phoneTab.style.color      = '#10b981';
+        emailTab.style.background = 'transparent';
+        emailTab.style.border     = '2px solid #334155';
+        emailTab.style.color      = '#94a3b8';
+        input.placeholder         = '📱 Enter your phone number';
+        input.type                = 'tel';
+        loginMethod.value         = 'phone';
+    }
+}
+</script>
+
+
+
+
+<script>
+// Theme load on page start
+(function() {
+    if(localStorage.getItem('theme') === 'light') {
+        document.body.classList.add('light-mode');
+    }
+})();
+
+function toggleTheme() {
+    document.body.classList.toggle('light-mode');
+    var btn = document.getElementById('themeBtn');
+    if(document.body.classList.contains('light-mode')) {
+        localStorage.setItem('theme', 'light');
+        if(btn) btn.textContent = '☀️ Light';
+    } else {
+        localStorage.setItem('theme', 'dark');
+        if(btn) btn.textContent = '🌙 Dark';
+    }
+}
+
+// Set correct button text on load
+window.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('themeBtn');
+    if(btn) {
+        if(document.body.classList.contains('light-mode')) {
+            btn.textContent = '☀️ Light';
+        } else {
+            btn.textContent = '🌙 Dark';
+        }
+    }
+});
+</script>
+<script>
+(function(){
+    var t=localStorage.getItem('fh_theme')||'dark';
+    document.documentElement.setAttribute('data-theme',t);
+})();
+function toggleTheme(){
+    var cur=localStorage.getItem('fh_theme')||'dark';
+    var next=cur==='dark'?'light':'dark';
+    localStorage.setItem('fh_theme',next);
+    document.documentElement.setAttribute('data-theme',next);
+    document.querySelectorAll('#themeBtn').forEach(function(b){
+        b.textContent=next==='light'?'🌙 Dark Mode':'☀️ Light Mode';
+    });
+}
+document.addEventListener('DOMContentLoaded',function(){
+    var t=localStorage.getItem('fh_theme')||'dark';
+    document.querySelectorAll('#themeBtn').forEach(function(b){
+        b.textContent=t==='light'?'🌙 Dark Mode':'☀️ Light Mode';
+    });
+});
+</script>
+<script>
+function toggleMenu(){
+    document.getElementById('nav-links').classList.toggle('open');
+    document.getElementById('hamburger').classList.toggle('active');
+}
+</script>
 </body>
 </html>
