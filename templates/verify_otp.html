@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify OTP - FreshHire</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="icon" href="/static/favicon.png" type="image/png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="background: linear-gradient(135deg, #0f172a, #1e293b); min-height:100vh; display:flex; align-items:center; justify-content:center;">
+
+<div class="form-container" style="width:440px;">
+    <div style="text-align:center; margin-bottom:25px;">
+        <a href="/" style="text-decoration:none;">
+            <img src="/static/logo.png" alt="logo" style="height:40px; margin-bottom:10px;">
+        </a>
+        <div style="font-size:40px; margin-bottom:10px;">📩</div>
+        <h2 style="margin-top:5px;">Enter OTP</h2>
+        <p style="color:#94a3b8; font-size:14px;">Check the flash message above for your OTP</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}" style="margin-bottom:15px;">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+        <input type="text" name="otp" placeholder="Enter 6-digit OTP" required maxlength="6"
+               style="width:100%; padding:13px 16px; margin-bottom:15px; border:2px solid #334155; border-radius:10px; font-size:20px; outline:none; font-family:'Poppins',sans-serif; background:#1e293b; color:white; transition:border 0.2s; box-sizing:border-box; text-align:center; letter-spacing:8px;"
+               onfocus="this.style.borderColor='#10b981'" onblur="this.style.borderColor='#334155'">
+
+        <button type="submit"
+                style="width:100%; padding:14px; background:linear-gradient(135deg, #10b981, #059669); color:white; border:none; border-radius:10px; font-size:16px; font-weight:700; cursor:pointer; font-family:'Poppins',sans-serif; transition:all 0.2s;"
+                onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(16,185,129,0.4)'"
+                onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'">
+            Verify OTP ✓
+        </button>
+    </form>
+
+    <p style="text-align:center; margin-top:20px; color:#64748b; font-size:14px;">
+        Wrong email? <a href="/forgot-password" style="color:#f59e0b; font-weight:600;">Try again</a>
+    </p>
+</div>
+
+<script>
+(function() {
+    var t = localStorage.getItem('fh_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+})();
+</script>
+</body>
+</html>

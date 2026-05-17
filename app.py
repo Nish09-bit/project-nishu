@@ -2,6 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import sqlite3
 import bcrypt
 import os
+import random
+from dotenv import load_dotenv
+load_dotenv()
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", "")
 from datetime import datetime
 
 app = Flask(__name__)
@@ -134,6 +139,62 @@ def logout():
     flash("Logged out successfully!", "success")
     return redirect(url_for("home"))
 
+# ================= FORGOT PASSWORD ================= #
+@app.route("/forgot-password", methods=["GET", "POST"])
+def forgot_password():
+    if request.method == "POST":
+        email = request.form.get("email", "").strip()
+        conn = get_db()
+        user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+        conn.close()
+        if user:
+            otp = str(random.randint(100000, 999999))
+            session["reset_otp"] = otp
+            session["reset_email"] = email
+            flash(f"OTP sent! Your OTP is: {otp}", "success")
+            return redirect(url_for("verify_otp"))
+        else:
+            flash("Email not found!", "error")
+    return render_template("forgot_password.html")
+
+@app.route("/verify-otp", methods=["GET", "POST"])
+def verify_otp():
+    if "reset_email" not in session:
+        return redirect(url_for("forgot_password"))
+    if request.method == "POST":
+        entered_otp = request.form.get("otp", "").strip()
+        if entered_otp == session.get("reset_otp"):
+            session["otp_verified"] = True
+            return redirect(url_for("reset_password"))
+        else:
+            flash("Wrong OTP! Try again.", "error")
+    return render_template("verify_otp.html")
+
+@app.route("/reset-password", methods=["GET", "POST"])
+def reset_password():
+    if not session.get("otp_verified"):
+        return redirect(url_for("forgot_password"))
+    if request.method == "POST":
+        new_password = request.form.get("new_password", "")
+        confirm_password = request.form.get("confirm_password", "")
+        if new_password != confirm_password:
+            flash("Passwords do not match!", "error")
+        elif len(new_password) < 6:
+            flash("Password must be at least 6 characters!", "error")
+        else:
+            hashed = bcrypt.hashpw(new_password.encode("utf-8"), bcrypt.gensalt())
+            conn = get_db()
+            conn.execute("UPDATE users SET password=? WHERE email=?",
+                        (hashed.decode("utf-8"), session["reset_email"]))
+            conn.commit()
+            conn.close()
+            session.pop("reset_otp", None)
+            session.pop("reset_email", None)
+            session.pop("otp_verified", None)
+            flash("Password reset successful! Please login.", "success")
+            return redirect(url_for("login"))
+    return render_template("reset_password.html")
+
 # ================= JOBS ================= #
 @app.route("/jobs")
 def jobs():
@@ -142,7 +203,6 @@ def jobs():
     skill    = request.args.get("skill", "").strip()
     salary   = request.args.get("salary", "").strip()
     conn     = get_db()
-
     sql    = "SELECT * FROM jobs WHERE 1=1"
     params = []
     if keyword:
@@ -160,14 +220,11 @@ def jobs():
         params.append(f"%{salary}%")
     sql += " ORDER BY id DESC"
     jobs = conn.execute(sql, params).fetchall()
-
-    # Dropdown options
     all_locations  = conn.execute("SELECT DISTINCT location FROM jobs WHERE location IS NOT NULL AND location != ''").fetchall()
     all_salaries   = conn.execute("SELECT DISTINCT salary FROM jobs WHERE salary IS NOT NULL AND salary != ''").fetchall()
     all_titles     = conn.execute("SELECT DISTINCT job_title FROM jobs WHERE job_title IS NOT NULL").fetchall()
     all_skills_raw = conn.execute("SELECT required_skills FROM jobs WHERE required_skills IS NOT NULL AND required_skills != ''").fetchall()
     all_skills = sorted(set(s.strip() for row in all_skills_raw for s in row[0].split(',')))
-
     conn.close()
     return render_template("jobs.html", jobs=jobs,
                            keyword=keyword, location=location,
@@ -199,13 +256,9 @@ def post_job():
         conn = get_db()
         conn.execute(
             "INSERT INTO jobs (posted_by, job_title, company, location, description, required_skills, salary, apply_link) VALUES (?,?,?,?,?,?,?,?)",
-            (session["user_id"],
-             request.form.get("job_title"),
-             request.form.get("company"),
-             request.form.get("location"),
-             request.form.get("description"),
-             request.form.get("required_skills"),
-             request.form.get("salary"),
+            (session["user_id"], request.form.get("job_title"), request.form.get("company"),
+             request.form.get("location"), request.form.get("description"),
+             request.form.get("required_skills"), request.form.get("salary"),
              request.form.get("apply_link"))
         )
         conn.commit()
@@ -251,8 +304,7 @@ def apply_job(job_id):
             if job:
                 conn.execute(
                     "INSERT INTO notifications (user_id, message, created_at) VALUES (?,?,?)",
-                    (job["posted_by"],
-                     f"Someone applied for your job: {job['job_title']}!",
+                    (job["posted_by"], f"Someone applied for your job: {job['job_title']}!",
                      datetime.now().strftime("%Y-%m-%d %H:%M"))
                 )
             conn.commit()
@@ -286,9 +338,7 @@ def profile():
         flash("Please login first!", "error")
         return redirect(url_for("login"))
     conn = get_db()
-    existing = conn.execute(
-        "SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)
-    ).fetchone()
+    existing = conn.execute("SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)).fetchone()
     if request.method == "POST":
         photo_filename = existing["photo"] if existing and existing["photo"] else None
         if "photo" in request.files:
@@ -336,9 +386,7 @@ def view_my_profile():
         flash("Please login first!", "error")
         return redirect(url_for("login"))
     conn = get_db()
-    my_profile = conn.execute(
-        "SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)
-    ).fetchone()
+    my_profile = conn.execute("SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)).fetchone()
     conn.close()
     if not my_profile:
         flash("Create your profile first!", "error")
@@ -351,9 +399,7 @@ def edit_profile():
         flash("Please login first!", "error")
         return redirect(url_for("login"))
     conn = get_db()
-    existing = conn.execute(
-        "SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)
-    ).fetchone()
+    existing = conn.execute("SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)).fetchone()
     if request.method == "POST":
         conn.execute("""UPDATE profiles SET name=?, email=?, phone=?, city=?, bio=?,
             college=?, degree=?, primary_skill=?, project_title=?, project_desc=?, project_link=?
@@ -423,12 +469,10 @@ def bookmark(job_id):
         (session["user_id"], job_id)
     ).fetchone()
     if already:
-        conn.execute("DELETE FROM bookmarks WHERE user_id=? AND job_id=?",
-                     (session["user_id"], job_id))
+        conn.execute("DELETE FROM bookmarks WHERE user_id=? AND job_id=?", (session["user_id"], job_id))
         flash("Bookmark removed!", "success")
     else:
-        conn.execute("INSERT INTO bookmarks (user_id, job_id) VALUES (?,?)",
-                     (session["user_id"], job_id))
+        conn.execute("INSERT INTO bookmarks (user_id, job_id) VALUES (?,?)", (session["user_id"], job_id))
         flash("Job bookmarked! ✅", "success")
     conn.commit()
     conn.close()
@@ -456,8 +500,7 @@ def notifications():
         return redirect(url_for("login"))
     conn = get_db()
     notifs = conn.execute(
-        "SELECT * FROM notifications WHERE user_id=? ORDER BY id DESC",
-        (session["user_id"],)
+        "SELECT * FROM notifications WHERE user_id=? ORDER BY id DESC", (session["user_id"],)
     ).fetchall()
     conn.execute("UPDATE notifications SET is_read=1 WHERE user_id=?", (session["user_id"],))
     conn.commit()
@@ -476,15 +519,12 @@ def chat(receiver_id):
         if message:
             conn.execute(
                 "INSERT INTO chats (sender_id, receiver_id, message, sent_at) VALUES (?,?,?,?)",
-                (session["user_id"], receiver_id, message,
-                 datetime.now().strftime("%Y-%m-%d %H:%M"))
+                (session["user_id"], receiver_id, message, datetime.now().strftime("%Y-%m-%d %H:%M"))
             )
             conn.execute(
                 "INSERT INTO notifications (user_id, message, created_at, sender_id) VALUES (?,?,?,?)",
-                (receiver_id,
-                 f"💬 {session['name']} sent you a message!",
-                 datetime.now().strftime("%Y-%m-%d %H:%M"),
-                 session["user_id"])
+                (receiver_id, f"💬 {session['name']} sent you a message!",
+                 datetime.now().strftime("%Y-%m-%d %H:%M"), session["user_id"])
             )
             conn.commit()
     messages = conn.execute("""
@@ -507,20 +547,12 @@ def dashboard():
     total_jobs     = conn.execute("SELECT COUNT(*) FROM jobs").fetchone()[0]
     total_profiles = conn.execute("SELECT COUNT(*) FROM profiles").fetchone()[0]
     total_users    = conn.execute("SELECT COUNT(*) FROM users").fetchone()[0]
-    my_jobs        = conn.execute(
-        "SELECT * FROM jobs WHERE posted_by=? ORDER BY id DESC", (session["user_id"],)
-    ).fetchall()
-    my_profile     = conn.execute(
-        "SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)
-    ).fetchone()
-    is_admin       = conn.execute(
-        "SELECT * FROM admins WHERE user_id=?", (session["user_id"],)
-    ).fetchone()
+    my_jobs        = conn.execute("SELECT * FROM jobs WHERE posted_by=? ORDER BY id DESC", (session["user_id"],)).fetchall()
+    my_profile     = conn.execute("SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)).fetchone()
+    is_admin       = conn.execute("SELECT * FROM admins WHERE user_id=?", (session["user_id"],)).fetchone()
     conn.close()
-    return render_template("dashboard.html",
-                           total_jobs=total_jobs, total_profiles=total_profiles,
-                           total_users=total_users, my_jobs=my_jobs,
-                           my_profile=my_profile, is_admin=is_admin)
+    return render_template("dashboard.html", total_jobs=total_jobs, total_profiles=total_profiles,
+                           total_users=total_users, my_jobs=my_jobs, my_profile=my_profile, is_admin=is_admin)
 
 # ================= ADMIN ================= #
 @app.route("/admin")
@@ -529,9 +561,7 @@ def admin():
         flash("Please login first!", "error")
         return redirect(url_for("login"))
     conn = get_db()
-    is_admin = conn.execute(
-        "SELECT * FROM admins WHERE user_id=?", (session["user_id"],)
-    ).fetchone()
+    is_admin = conn.execute("SELECT * FROM admins WHERE user_id=?", (session["user_id"],)).fetchone()
     if not is_admin:
         conn.close()
         flash("Access denied!", "error")
@@ -608,9 +638,7 @@ def recommendations():
         flash("Please login first!", "error")
         return redirect(url_for("login"))
     conn = get_db()
-    my_profile = conn.execute(
-        "SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)
-    ).fetchone()
+    my_profile = conn.execute("SELECT * FROM profiles WHERE user_id=?", (session["user_id"],)).fetchone()
     if not my_profile or not my_profile["primary_skill"]:
         conn.close()
         flash("Create your profile first!", "error")
@@ -758,6 +786,56 @@ def settings():
                 flash("Type DELETE to confirm!", "error")
     conn.close()
     return render_template("settings.html", user=user)
+# ================= GOOGLE LOGIN ================= #
+import requests as http_requests
+
+@app.route("/google-login")
+def google_login():
+    google_auth_url = (
+        "https://accounts.google.com/o/oauth2/auth"
+        "?client_id=" + GOOGLE_CLIENT_ID +
+        "&redirect_uri=http://localhost:5000/google-callback"
+        "&response_type=code"
+        "&scope=openid email profile"
+    )
+    return redirect(google_auth_url)
+
+@app.route("/google-callback")
+def google_callback():
+    code = request.args.get("code")
+    token_response = http_requests.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "code": code,
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "redirect_uri": "http://localhost:5000/google-callback",
+            "grant_type": "authorization_code",
+        }
+    )
+    token_data = token_response.json()
+    access_token = token_data.get("access_token")
+    user_info = http_requests.get(
+        "https://www.googleapis.com/oauth2/v1/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"}
+    ).json()
+    email = user_info.get("email")
+    name = user_info.get("given_name")
+    conn = get_db()
+    user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+    if not user:
+        conn.execute(
+            "INSERT INTO users (first_name, email, username, password, role) VALUES (?,?,?,?,?)",
+            (name, email, email, "google_login", "fresher")
+        )
+        conn.commit()
+        user = conn.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+    session["user_id"] = user["id"]
+    session["name"] = user["first_name"]
+    session["role"] = user["role"]
+    conn.close()
+    flash(f"Welcome, {name}! 👋", "success")
+    return redirect(url_for("home"))
 
 # ================= OTHER ================= #
 @app.route("/about")
@@ -772,5 +850,4 @@ def contact():
     return render_template("contact.html")
 
 if __name__ == "__main__":
-    import os
-app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=False)
