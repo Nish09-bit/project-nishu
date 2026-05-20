@@ -1,10 +1,189 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>FreshHire</title>
+    <title>FreshHire — Find Your First Job</title>
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.png" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        /* ===== IMPROVED UI STYLES ===== */
+
+        /* Animated gradient hero */
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 6s ease infinite;
+        }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating animation for hero cards */
+        .job-card-float { animation: floatUp 3s ease-in-out infinite; }
+        .job-card-float:nth-child(2) { animation-delay: 1.5s; }
+        @keyframes floatUp {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* Improved job cards */
+        .job-card-new {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 22px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .job-card-new::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #10b981, #059669);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+        .job-card-new:hover {
+            transform: translateY(-5px);
+            border-color: #10b981;
+            box-shadow: 0 20px 40px rgba(16,185,129,0.15);
+        }
+        .job-card-new:hover::before { transform: scaleX(1); }
+
+        /* Company logo circle */
+        .company-logo {
+            width: 52px; height: 52px;
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            flex-shrink: 0;
+            border: 2px solid #a7f3d0;
+        }
+
+        /* Skill badges improved */
+        .skill-badge {
+            background: rgba(16,185,129,0.1);
+            color: #10b981;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid rgba(16,185,129,0.2);
+            transition: all 0.2s;
+        }
+        .skill-badge:hover {
+            background: rgba(16,185,129,0.2);
+        }
+
+        /* Stats bar improved */
+        .stats-bar-new {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            padding: 30px 40px;
+            display: flex;
+            justify-content: center;
+            gap: 60px;
+            flex-wrap: wrap;
+            border-top: 1px solid #334155;
+            border-bottom: 1px solid #334155;
+        }
+        .stat-new {
+            text-align: center;
+        }
+        .stat-new .stat-number {
+            font-size: 32px;
+            font-weight: 800;
+            color: #10b981;
+            display: block;
+            line-height: 1;
+        }
+        .stat-new .stat-label {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        /* Search box improved */
+        .search-box-new {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 20px;
+            padding: 25px 30px;
+            margin: 40px 0 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .search-box-new input {
+            background: #0f172a;
+            border: 2px solid #334155;
+            border-radius: 10px;
+            color: white;
+            padding: 13px 16px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            outline: none;
+            flex: 1;
+            transition: border 0.2s;
+        }
+        .search-box-new input:focus { border-color: #10b981; }
+        .search-box-new input::placeholder { color: #64748b; }
+
+        /* Section title improved */
+        .section-title-new {
+            font-size: 24px;
+            font-weight: 800;
+            color: #f1f5f9;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title-new::after {
+            content: '';
+            flex: 1;
+            height: 2px;
+            background: linear-gradient(90deg, #10b981, transparent);
+            border-radius: 2px;
+        }
+
+        /* Empty state */
+        .empty-state-new {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        .empty-state-new .empty-icon { font-size: 64px; display: block; margin-bottom: 16px; }
+        .empty-state-new h3 { color: #94a3b8; font-size: 20px; margin-bottom: 8px; }
+
+        /* Animate cards on load */
+        .job-card-new {
+            animation: fadeInUp 0.5s ease forwards;
+            opacity: 0;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .job-card-new:nth-child(1) { animation-delay: 0.1s; }
+        .job-card-new:nth-child(2) { animation-delay: 0.15s; }
+        .job-card-new:nth-child(3) { animation-delay: 0.2s; }
+        .job-card-new:nth-child(4) { animation-delay: 0.25s; }
+        .job-card-new:nth-child(5) { animation-delay: 0.3s; }
+        .job-card-new:nth-child(6) { animation-delay: 0.35s; }
+
+        /* Light mode overrides */
+        body.light-mode .job-card-new { background: #ffffff; border-color: #e2e8f0; }
+        body.light-mode .job-card-new:hover { border-color: #10b981; }
+        body.light-mode .stats-bar-new { background: linear-gradient(135deg, #f8fafb, #f1f5f9); border-color: #e2e8f0; }
+        body.light-mode .stat-new .stat-label { color: #64748b; }
+        body.light-mode .search-box-new { background: #ffffff; border-color: #e2e8f0; }
+        body.light-mode .search-box-new input { background: #f8fafb; color: #1a1a2e; border-color: #e2e8f0; }
+        body.light-mode .section-title-new { color: #1a1a2e; }
+        body.light-mode .company-logo { background: linear-gradient(135deg, #ecfdf5, #d1fae5); }
+    </style>
 </head>
 <body>
 
@@ -62,6 +241,7 @@
 <div class="hero">
     <div class="hero-content">
         <div class="hero-text">
+            <div style="display:inline-block; background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:20px; padding:6px 16px; font-size:12px; color:#10b981; font-weight:600; margin-bottom:20px; letter-spacing:1px;">🚀 #1 JOB PORTAL FOR FRESHERS</div>
             <h1>Find Your <span>First Job</span> 🚀</h1>
             <p>A platform built exclusively for freshers.<br>No experience needed — just skills & passion!</p>
             <div class="hero-buttons">
@@ -87,17 +267,29 @@
     </div>
 </div>
 
-<!-- Stats -->
-<div class="stats-bar">
-    <div class="stat">🏢 <b>100+</b> Companies</div>
-    <div class="stat">👨‍💻 <b>500+</b> Freshers</div>
-    <div class="stat">💼 <b>200+</b> Jobs Posted</div>
-    <div class="stat">✅ <b>Free</b> to Use</div>
+<!-- Stats Bar -->
+<div class="stats-bar-new">
+    <div class="stat-new">
+        <span class="stat-number">100+</span>
+        <span class="stat-label">🏢 Companies</span>
+    </div>
+    <div class="stat-new">
+        <span class="stat-number">500+</span>
+        <span class="stat-label">👨‍💻 Freshers</span>
+    </div>
+    <div class="stat-new">
+        <span class="stat-number">200+</span>
+        <span class="stat-label">💼 Jobs Posted</span>
+    </div>
+    <div class="stat-new">
+        <span class="stat-number">FREE</span>
+        <span class="stat-label">✅ Always Free</span>
+    </div>
 </div>
 
-<!-- Search & Filter -->
+<!-- Search -->
 <div class="container">
-    <div class="search-filter-box">
+    <div class="search-box-new">
         <form method="GET" action="/">
             <div class="search-row">
                 <input type="text" name="keyword" placeholder="🔍 Search by job title or skill..." value="{{ request.args.get('keyword', '') }}">
@@ -108,69 +300,85 @@
         </form>
     </div>
 
-    <h2 class="section-title">Latest Jobs 💼</h2>
+    <h2 class="section-title-new">💼 Latest Jobs</h2>
+
     <div class="cards-grid">
         {% for job in jobs %}
-        <div class="card">
-            <div style="display:flex; align-items:center; gap:12px; margin-bottom:15px;">
-                <div style="width:48px; height:48px; background:#ecfdf5; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px;">🏢</div>
-                <div>
-                    <h3 style="margin:0; font-size:17px;">{{ job.job_title }}</h3>
-                    <p style="margin:0; color:#94a3b8; font-size:13px;">{{ job.company }}</p>
+        <div class="job-card-new">
+            <!-- Header -->
+            <div style="display:flex; align-items:flex-start; gap:14px; margin-bottom:16px;">
+                <div class="company-logo">🏢</div>
+                <div style="flex:1; min-width:0;">
+                    <h3 style="margin:0; font-size:16px; font-weight:700; color:#f1f5f9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ job.job_title }}</h3>
+                    <p style="margin:4px 0 0; color:#94a3b8; font-size:13px; font-weight:500;">{{ job.company }}</p>
                 </div>
             </div>
-            <p style="font-size:13px; color:#64748b; margin-bottom:6px;">📍 {{ job.location }}</p>
-            <p style="font-size:13px; color:#64748b; margin-bottom:10px;">💰 {{ job.salary }}</p>
+
+            <!-- Details -->
+            <div style="display:flex; gap:16px; margin-bottom:14px; flex-wrap:wrap;">
+                <span style="color:#94a3b8; font-size:12px;">📍 {{ job.location }}</span>
+                <span style="color:#10b981; font-size:12px; font-weight:600;">💰 {{ job.salary }}</span>
+            </div>
+
+            <!-- Skills -->
             {% if job.required_skills %}
-            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:15px;">
-                {% for skill in job.required_skills.split(',') %}
-                <span style="background:#ecfdf5; color:#059669; padding:4px 10px; border-radius:20px; font-size:11px; border:1px solid #a7f3d0; font-weight:600;">{{ skill.strip() }}</span>
+            <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:18px;">
+                {% for skill in job.required_skills.split(',')[:3] %}
+                <span class="skill-badge">{{ skill.strip() }}</span>
                 {% endfor %}
+                {% if job.required_skills.split(',')|length > 3 %}
+                <span class="skill-badge" style="background:rgba(100,116,139,0.1); color:#64748b; border-color:rgba(100,116,139,0.2);">+{{ job.required_skills.split(',')|length - 3 }} more</span>
+                {% endif %}
             </div>
             {% endif %}
-            <a href="/job/{{ job.id }}" style="display:block; text-align:center; margin-bottom:8px; color:#10b981; font-size:13px; font-weight:600;">View Details →</a>
-            <a href="/bookmark/{{ job.id }}" style="display:block; text-align:center; margin-bottom:8px; color:#f59e0b; font-size:13px; font-weight:600;">🔖 Bookmark</a>
-            {% if job.apply_link %}
-            <a href="/apply/{{ job.id }}" class="btn" style="width:100%; text-align:center; display:block;">Apply Now →</a>
-            {% endif %}
+
+            <!-- Actions -->
+            <div style="display:flex; gap:8px; margin-top:auto;">
+                <a href="/job/{{ job.id }}" style="flex:1; text-align:center; padding:9px; background:rgba(16,185,129,0.1); color:#10b981; border-radius:8px; font-size:13px; font-weight:600; text-decoration:none; border:1px solid rgba(16,185,129,0.2); transition:all 0.2s;" onmouseover="this.style.background='rgba(16,185,129,0.2)'" onmouseout="this.style.background='rgba(16,185,129,0.1)'">View →</a>
+                <a href="/bookmark/{{ job.id }}" style="padding:9px 12px; background:rgba(245,158,11,0.1); color:#f59e0b; border-radius:8px; font-size:13px; text-decoration:none; border:1px solid rgba(245,158,11,0.2); transition:all 0.2s;" onmouseover="this.style.background='rgba(245,158,11,0.2)'" onmouseout="this.style.background='rgba(245,158,11,0.1)'">🔖</a>
+                {% if job.apply_link %}
+                <a href="/apply/{{ job.id }}" class="btn" style="flex:1; text-align:center; padding:9px; font-size:13px;">Apply →</a>
+                {% endif %}
+            </div>
         </div>
         {% endfor %}
     </div>
 
     {% if not jobs %}
-    <div class="empty-state">
+    <div class="empty-state-new">
         <span class="empty-icon">🔍</span>
         <h3>No jobs found!</h3>
         <p>Try different keywords or <a href="/" style="color:#10b981;">clear search</a></p>
     </div>
     {% endif %}
+
+    <!-- View All Jobs Button -->
+    {% if jobs %}
+    <div style="text-align:center; margin:40px 0;">
+        <a href="/jobs" class="btn" style="padding:14px 40px; font-size:15px;">View All Jobs →</a>
+    </div>
+    {% endif %}
 </div>
 
 <!-- Reviews Section -->
-<div style="background:#1e293b; padding:60px 20px; margin-top:40px;">
+<div style="background:#1e293b; padding:60px 20px; margin-top:20px;">
     <div style="max-width:1100px; margin:0 auto;">
         <h2 style="text-align:center; color:white; font-size:28px; font-weight:800; margin-bottom:10px;">What Freshers Say 💬</h2>
         <p style="text-align:center; color:#94a3b8; margin-bottom:40px;">Real reviews from real users</p>
-
-        <!-- Existing Reviews -->
         <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:20px; margin-bottom:40px;">
             {% for review in reviews %}
-            <div style="background:rgba(255,255,255,0.05); border:1px solid #334155; border-radius:14px; padding:20px;">
+            <div style="background:rgba(255,255,255,0.05); border:1px solid #334155; border-radius:14px; padding:20px; transition:all 0.3s;" onmouseover="this.style.borderColor='#10b981'" onmouseout="this.style.borderColor='#334155'">
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
-                    <div style="width:45px; height:45px; background:#ecfdf5; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px;">👤</div>
+                    <div style="width:45px; height:45px; background:linear-gradient(135deg,#ecfdf5,#d1fae5); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:20px; border:2px solid #a7f3d0;">👤</div>
                     <div>
                         <p style="color:white; font-weight:600; margin:0; font-size:14px;">{{ review.first_name }}</p>
-                        <p style="color:#10b981; margin:0; font-size:13px;">
-                            {% for i in range(review.rating) %}⭐{% endfor %}
-                        </p>
+                        <p style="color:#f59e0b; margin:0; font-size:13px;">{% for i in range(review.rating) %}⭐{% endfor %}</p>
                     </div>
                 </div>
                 <p style="color:#94a3b8; font-size:14px; line-height:1.6; margin:0;">"{{ review.message }}"</p>
             </div>
             {% endfor %}
         </div>
-
-        <!-- Review Form -->
         {% if session.get('user_id') %}
         <div style="max-width:500px; margin:0 auto; background:rgba(255,255,255,0.05); padding:30px; border-radius:16px; border:1px solid #334155;">
             <h3 style="color:white; margin-bottom:20px; text-align:center;">Leave a Review ⭐</h3>
@@ -197,12 +405,7 @@
     </div>
 </div>
 
-<footer>
-    © 2026 <span>FreshHire</span> — Built for Freshers 💚
-</footer>
-
-
-
+<footer>© 2026 <span>FreshHire</span> — Built for Freshers 💚</footer>
 
 <script>
 function setRating(val) {
@@ -210,15 +413,8 @@ function setRating(val) {
     var stars = document.querySelectorAll('.star');
     stars.forEach(function(s) {
         var sv = parseInt(s.getAttribute('data-val'));
-        if (sv <= val) {
-            s.style.opacity = '1';
-            s.style.color = '#f59e0b';
-            s.style.transform = 'scale(1.2)';
-        } else {
-            s.style.opacity = '0.3';
-            s.style.color = 'white';
-            s.style.transform = 'scale(1)';
-        }
+        if (sv <= val) { s.style.opacity='1'; s.style.color='#f59e0b'; s.style.transform='scale(1.2)'; }
+        else { s.style.opacity='0.3'; s.style.color='white'; s.style.transform='scale(1)'; }
     });
     var msgs = ['', 'Poor', 'Fair', 'Good', 'Very Good', 'Excellent!'];
     document.getElementById('ratingMsg').textContent = msgs[val] + ' (' + val + '/5)';
