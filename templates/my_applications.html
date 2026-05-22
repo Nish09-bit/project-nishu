@@ -5,185 +5,82 @@
     <link rel="stylesheet" href="/static/style.css">
     <link rel="icon" href="/static/favicon.png" type="image/png">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        .app-item { background:#1e293b; border:1px solid #334155; border-radius:14px; padding:20px; margin-bottom:12px; transition:all 0.2s; animation:fadeInUp 0.4s ease forwards; opacity:0; }
+        .app-item:hover { border-color:#10b981; transform:translateY(-2px); }
+        @keyframes fadeInUp { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:translateY(0)} }
+        .app-item:nth-child(1){animation-delay:0.05s}.app-item:nth-child(2){animation-delay:0.1s}.app-item:nth-child(3){animation-delay:0.15s}
+        body.light-mode .app-item { background:#fff; border-color:#e2e8f0; }
+    </style>
 </head>
 <body>
 <nav>
-    <a href="/" style="display:flex; align-items:center; gap:8px; text-decoration:none;">
-        <img src="/static/logo.png" alt="logo" style="height:32px;">
-        <span style="color:white; font-weight:800; font-size:20px;">FreshHire</span>
-    </a>
+    <a href="/" style="display:flex;align-items:center;gap:8px;text-decoration:none;"><img src="/static/logo.png" alt="logo" style="height:32px;"><span style="color:white;font-weight:800;font-size:20px;">FreshHire</span></a>
     <div class="nav-links" id="nav-links">
         {% if session.get('user_id') %}
-            {% if session.get('role') == 'hirer' %}
-            <a href="/post-job">Post Job</a>
-            {% endif %}
-            <a href="/jobs">Jobs</a>
-            <a href="/profiles">Freshers</a>
+            {% if session.get('role') == 'hirer' %}<a href="/post-job">Post Job</a>{% endif %}
+            <a href="/jobs">Jobs</a><a href="/profiles">Freshers</a>
             <a href="/notifications" style="position:relative;">🔔{% if notif_count > 0 %}<span style="position:absolute;top:-5px;right:-5px;background:#dc2626;color:white;border-radius:50%;width:16px;height:16px;font-size:10px;display:flex;align-items:center;justify-content:center;font-weight:700;">{{ notif_count }}</span>{% endif %}</a>
             <a href="/dashboard">Dashboard</a>
-            <div class="nav-dropdown">
-                <button class="nav-dropdown-btn">👤 {{ session.get('name') }} ▾</button>
+            <div class="nav-dropdown"><button class="nav-dropdown-btn">👤 {{ session.get('name') }} ▾</button>
                 <div class="nav-dropdown-menu">
-                    <a href="/my-profile">👤 My Profile</a>
-                    <a href="/bookmarks">🔖 Bookmarks</a>
-                    <a href="/resume-builder">📄 Resume Builder</a>
-                    <a href="/my-applications">📝 My Applications</a>
-                    <a href="/settings">⚙️ Settings</a>
-                    <div class="dropdown-divider"></div>
-                    <a href="#" onclick="toggleTheme();return false;" id="themeBtn">☀️ Light Mode</a>
-                    <div class="dropdown-divider"></div>
+                    <a href="/my-profile">👤 My Profile</a><a href="/bookmarks">🔖 Bookmarks</a>
+                    <a href="/resume-builder">📄 Resume Builder</a><a href="/my-applications">📝 My Applications</a>
+                    <a href="/settings">⚙️ Settings</a><div class="dropdown-divider"></div>
+                    <a href="#" onclick="toggleTheme();return false;" id="themeBtn">☀️ Light Mode</a><div class="dropdown-divider"></div>
                     <a href="/logout" style="color:#ef4444 !important;">🚪 Logout</a>
                 </div>
             </div>
-        {% else %}
-            <a href="/jobs">Jobs</a>
-            <a href="/profiles">Freshers</a>
-            <a href="/about">About</a>
-            <a href="/contact">Contact</a>
-            <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">☀️ Light</button>
-            <a href="/login">Login</a>
-            <a href="/signup" style="background:linear-gradient(135deg,#10b981,#059669);color:white !important;border-radius:8px;padding:7px 18px;font-weight:700;">Sign Up</a>
-        {% endif %}
+        {% else %}<a href="/login">Login</a>{% endif %}
     </div>
-    <div class="hamburger" onclick="toggleMenu()" id="hamburger">
-        <span></span><span></span><span></span>
-    </div>
+    <div class="hamburger" onclick="toggleMenu()" id="hamburger"><span></span><span></span><span></span></div>
 </nav>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-        <div class="container" style="margin-top:20px; margin-bottom:0;">
-        {% for category, message in messages %}
-            <div class="flash-{{ category }}">{{ message }}</div>
-        {% endfor %}
-        </div>
-    {% endif %}
-{% endwith %}
-
-<div class="page-banner">
-    <h1>📝 My Applications</h1>
-    <p>Track all your job applications in one place</p>
+{% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="container">{% for category, message in messages %}<div class="flash-{{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+<div style="background:linear-gradient(135deg,#0f172a,#1e293b);padding:50px 20px;text-align:center;color:white;">
+    <div style="font-size:48px;margin-bottom:12px;">📝</div>
+    <h1 style="font-size:28px;font-weight:800;margin-bottom:8px;">My Applications</h1>
+    <p style="color:#94a3b8;">Track all your job applications</p>
 </div>
-
-<div class="container">
-
-    <!-- Stats Row -->
+<div style="max-width:750px;margin:30px auto;padding:0 20px 60px;">
     {% if applications %}
-    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(150px, 1fr)); gap:15px; margin-bottom:30px; margin-top:20px;">
-        <div class="card" style="text-align:center; padding:18px;">
-            <p style="font-size:28px; font-weight:800; color:#10b981;">{{ applications|length }}</p>
-            <p style="font-size:12px; color:#94a3b8;">Total Applied</p>
-        </div>
-        <div class="card" style="text-align:center; padding:18px;">
-            <p style="font-size:28px; font-weight:800; color:#f59e0b;">{{ applications|selectattr('status', 'equalto', 'pending')|list|length }}</p>
-            <p style="font-size:12px; color:#94a3b8;">Pending</p>
-        </div>
-        <div class="card" style="text-align:center; padding:18px;">
-            <p style="font-size:28px; font-weight:800; color:#3b82f6;">{{ applications|selectattr('status', 'equalto', 'reviewed')|list|length }}</p>
-            <p style="font-size:12px; color:#94a3b8;">Reviewed</p>
-        </div>
-        <div class="card" style="text-align:center; padding:18px;">
-            <p style="font-size:28px; font-weight:800; color:#10b981;">{{ applications|selectattr('status', 'equalto', 'accepted')|list|length }}</p>
-            <p style="font-size:12px; color:#94a3b8;">Accepted</p>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Applications List -->
-    <div class="cards-grid">
+        <p style="color:#64748b;font-size:13px;margin-bottom:20px;">{{ applications|length }} application{{ 's' if applications|length != 1 else '' }}</p>
         {% for app in applications %}
-        <div class="card">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
-                <div style="display:flex; align-items:center; gap:12px;">
-                    <div style="width:46px; height:46px; background:#ecfdf5; border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:20px;">🏢</div>
+        <div class="app-item">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap;">
+                <div style="display:flex;align-items:center;gap:14px;">
+                    <div style="width:48px;height:48px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;border:2px solid #a7f3d0;flex-shrink:0;">🏢</div>
                     <div>
-                        <h3 style="margin:0; font-size:15px; color:#1a1a2e;">{{ app.job_title }}</h3>
-                        <p style="margin:0; color:#94a3b8; font-size:12px;">{{ app.company }}</p>
+                        <h3 style="color:#f1f5f9;margin:0 0 4px;font-size:16px;font-weight:700;">{{ app.job_title }}</h3>
+                        <p style="color:#94a3b8;margin:0;font-size:13px;">{{ app.company }} • 📍 {{ app.location }}</p>
                     </div>
                 </div>
-                <!-- Status Badge -->
-                {% if app.status == 'pending' %}
-                <span style="background:#fef3c7; color:#92400e; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap;">⏳ Pending</span>
-                {% elif app.status == 'reviewed' %}
-                <span style="background:#dbeafe; color:#1e40af; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap;">👀 Reviewed</span>
-                {% elif app.status == 'accepted' %}
-                <span style="background:#d1fae5; color:#065f46; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap;">✅ Accepted!</span>
-                {% elif app.status == 'rejected' %}
-                <span style="background:#fee2e2; color:#991b1b; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700; white-space:nowrap;">❌ Rejected</span>
-                {% else %}
-                <span style="background:#f1f5f9; color:#64748b; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;">⏳ Pending</span>
-                {% endif %}
+                <span style="padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700;
+                    {% if app.status == 'accepted' %}background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);
+                    {% elif app.status == 'rejected' %}background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.3);
+                    {% else %}background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);{% endif %}">
+                    {% if app.status == 'accepted' %}✅ Accepted{% elif app.status == 'rejected' %}❌ Rejected{% else %}⏳ Pending{% endif %}
+                </span>
             </div>
-
-            <p style="font-size:12px; color:#64748b; margin-bottom:4px;">📍 {{ app.location }}</p>
-            <p style="font-size:12px; color:#94a3b8; margin-bottom:10px;">📅 Applied: {{ app.applied_on }}</p>
-
-            <!-- Progress Bar -->
-            <div style="background:#f1f5f9; border-radius:10px; height:6px; margin-bottom:8px; overflow:hidden;">
-                {% if app.status == 'pending' %}
-                <div style="background:#f59e0b; width:25%; height:100%; border-radius:10px;"></div>
-                {% elif app.status == 'reviewed' %}
-                <div style="background:#3b82f6; width:60%; height:100%; border-radius:10px;"></div>
-                {% elif app.status == 'accepted' %}
-                <div style="background:#10b981; width:100%; height:100%; border-radius:10px;"></div>
-                {% elif app.status == 'rejected' %}
-                <div style="background:#ef4444; width:100%; height:100%; border-radius:10px;"></div>
-                {% else %}
-                <div style="background:#f59e0b; width:25%; height:100%; border-radius:10px;"></div>
-                {% endif %}
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid #334155;">
+                <span style="color:#64748b;font-size:12px;">📅 Applied: {{ app.applied_on }}</span>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:10px; color:#94a3b8;">
-                <span>Applied</span><span>Reviewed</span><span>Decision</span>
-            </div>
-
-            {% if app.cover_letter %}
-            <p style="font-size:12px; color:#94a3b8; line-height:1.5; border-top:1px solid #e2e8f0; padding-top:10px; margin-top:12px; font-style:italic;">
-                "{{ app.cover_letter[:100] }}{% if app.cover_letter|length > 100 %}...{% endif %}"
-            </p>
-            {% endif %}
         </div>
         {% endfor %}
-    </div>
-
-    {% if not applications %}
-    <div class="empty-state">
-        <span class="empty-icon">📝</span>
-        <h3>No applications yet!</h3>
-        <p>Start applying for jobs to track them here.</p>
-        <a href="/jobs" class="btn">Browse Jobs</a>
+    {% else %}
+    <div style="text-align:center;padding:80px 20px;">
+        <div style="font-size:64px;margin-bottom:16px;">📭</div>
+        <h3 style="color:#94a3b8;margin-bottom:8px;">No applications yet!</h3>
+        <p style="color:#64748b;margin-bottom:20px;">Start applying for jobs today</p>
+        <a href="/jobs" class="btn">Browse Jobs →</a>
     </div>
     {% endif %}
 </div>
-
 <footer>© 2026 <span>FreshHire</span> — Built for Freshers 💚</footer>
-
-
 <script>
-(function(){
-    var t=localStorage.getItem('fh_theme')||'dark';
-    document.documentElement.setAttribute('data-theme',t);
-})();
-function toggleTheme(){
-    var cur=localStorage.getItem('fh_theme')||'dark';
-    var next=cur==='dark'?'light':'dark';
-    localStorage.setItem('fh_theme',next);
-    document.documentElement.setAttribute('data-theme',next);
-    document.querySelectorAll('#themeBtn').forEach(function(b){
-        b.textContent=next==='light'?'🌙 Dark Mode':'☀️ Light Mode';
-    });
-}
-document.addEventListener('DOMContentLoaded',function(){
-    var t=localStorage.getItem('fh_theme')||'dark';
-    document.querySelectorAll('#themeBtn').forEach(function(b){
-        b.textContent=t==='light'?'🌙 Dark Mode':'☀️ Light Mode';
-    });
-});
-</script>
-<script>
-function toggleMenu(){
-    document.getElementById('nav-links').classList.toggle('open');
-    document.getElementById('hamburger').classList.toggle('active');
-}
+(function(){var t=localStorage.getItem('fh_theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();
+function toggleTheme(){var cur=localStorage.getItem('fh_theme')||'dark';var next=cur==='dark'?'light':'dark';localStorage.setItem('fh_theme',next);document.documentElement.setAttribute('data-theme',next);document.querySelectorAll('#themeBtn').forEach(function(b){b.textContent=next==='light'?'🌙 Dark Mode':'☀️ Light Mode';});}
+document.addEventListener('DOMContentLoaded',function(){var t=localStorage.getItem('fh_theme')||'dark';document.querySelectorAll('#themeBtn').forEach(function(b){b.textContent=t==='light'?'🌙 Dark Mode':'☀️ Light Mode';});});
+function toggleMenu(){document.getElementById('nav-links').classList.toggle('open');document.getElementById('hamburger').classList.toggle('active');}
 </script>
 </body>
 </html>
